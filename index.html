@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MasterOne Mall - Intelligent Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/zone.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            lumina: {
+              sage: '#B4B792',
+              olive: '#646E57',
+              rust: '#8C4A33',
+              mint: '#A4BAA8',
+              tan: '#CCAC85',
+              cream: '#FAFAF9',
+              dark: '#2D3325',
+            }
+          },
+          fontFamily: {
+            outfit: ['Outfit', 'sans-serif'],
+            jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --lumina-sage: #B4B792;
+      --lumina-olive: #646E57;
+      --lumina-rust: #8C4A33;
+      --lumina-mint: #A4BAA8;
+      --lumina-tan: #CCAC85;
+      --lumina-cream: #FAFAF9;
+      --lumina-dark: #2D3325;
+    }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--lumina-cream);
+      color: var(--lumina-olive);
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    .motion-slide-in {
+      animation: motionSlide 0.8s cubic-bezier(0.2, 1, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    @keyframes motionSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity;
+    }
+    
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0) !important;
+    }
+
+    .stagger-1 { transition-delay: 0.05s !important; }
+    .stagger-2 { transition-delay: 0.15s !important; }
+    .stagger-3 { transition-delay: 0.25s !important; }
+    .stagger-4 { transition-delay: 0.35s !important; }
+    .stagger-5 { transition-delay: 0.45s !important; }
+    .stagger-6 { transition-delay: 0.55s !important; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--lumina-tan); border-radius: 10px; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+
+  <script type="importmap">
+{
+  "imports": {
+    "@angular/core": "https://esm.sh/@angular/core@19.1.5",
+    "@angular/common": "https://esm.sh/@angular/common@19.1.5",
+    "@angular/compiler": "https://esm.sh/@angular/compiler@19.1.5",
+    "@angular/platform-browser": "https://esm.sh/@angular/platform-browser@19.1.5",
+    "@angular/platform-browser-dynamic": "https://esm.sh/@angular/platform-browser-dynamic@19.1.5",
+    "@angular/forms": "https://esm.sh/@angular/forms@19.1.5",
+    "rxjs": "https://esm.sh/rxjs@7.8.1",
+    "rxjs/operators": "https://esm.sh/rxjs@7.8.1/operators",
+    "@google/genai": "https://esm.sh/@google/genai@1.39.0",
+    "react": "https://esm.sh/react@^19.2.4",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "react/": "https://esm.sh/react@^19.2.4/"
+  }
+}
+</script>
+</head>
+<body>
+  <app-root></app-root>
+  <script type="module" src="./index.tsx"></script>
+</body>
+</html>

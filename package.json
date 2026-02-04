@@ -1,0 +1,33 @@
+{
+  "name": "masterone-mall-management",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "ng serve",
+    "build": "ng build",
+    "preview": "ng serve --configuration=production"
+  },
+  "dependencies": {
+    "@angular/core": "19.1.0",
+    "@angular/common": "19.1.0",
+    "@angular/compiler": "19.1.0",
+    "@angular/platform-browser": "19.1.0",
+    "@angular/platform-browser-dynamic": "19.1.5",
+    "@angular/forms": "19.1.5",
+    "rxjs": "7.8.1",
+    "@google/genai": "1.39.0",
+    "react": "^19.2.4",
+    "lucide-react": "^0.563.0",
+    "recharts": "^3.7.0",
+    "@angular/build": "19.1.0",
+    "@angular/cli": "19.1.0",
+    "@angular/compiler-cli": "19.1.0",
+    "tailwindcss": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

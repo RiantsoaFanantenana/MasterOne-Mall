@@ -1,0 +1,8 @@
+{
+  "name": "MasterOne Mall Management",
+  "description": "Portail de gestion intelligente pour MasterOne Mall utilisant la palette Landscape et l'IA Gemini.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
