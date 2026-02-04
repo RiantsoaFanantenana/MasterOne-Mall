@@ -2,11 +2,12 @@
 import { Component, Input, Output, EventEmitter, inject, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventReviewsListComponent, EventReview } from './event-reviews-list.component.ts';
+import { ShopReviewFormComponent } from './shop-review-form.component.ts';
 
 @Component({
   selector: 'app-event-details',
   standalone: true,
-  imports: [CommonModule, EventReviewsListComponent],
+  imports: [CommonModule, EventReviewsListComponent, ShopReviewFormComponent],
   template: `
     <div class="bg-white min-h-screen pb-40 animate-in fade-in duration-700">
       <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md px-8 md:px-16 lg:px-32 py-5 border-b border-lumina-rust/5 flex items-center justify-between shadow-sm">
@@ -55,10 +56,18 @@ import { EventReviewsListComponent, EventReview } from './event-reviews-list.com
             </div>
             <p class="text-2xl md:text-4xl text-lumina-olive leading-snug font-medium font-outfit">{{ event.description }}</p>
           </div>
-          <div class="reveal"><app-event-reviews-list [reviews]="reviews"></app-event-reviews-list></div>
+          
+          <div class="space-y-24">
+            <app-event-reviews-list [reviews]="reviews"></app-event-reviews-list>
+            
+            <div class="pt-12 border-t border-lumina-rust/10">
+              <app-shop-review-form (onSubmit)="handleAddReview($event)"></app-shop-review-form>
+            </div>
+          </div>
         </div>
+
         <div class="lg:col-span-5 space-y-16">
-          <div class="bg-lumina-cream p-12 rounded-[48px] border border-lumina-rust/5 reveal">
+          <div class="bg-lumina-cream p-12 rounded-[48px] border border-lumina-rust/5 reveal sticky top-32">
             <h4 class="text-sm font-black uppercase tracking-[0.4em] text-lumina-rust mb-10">Practical Information</h4>
             <div class="space-y-8">
               <div class="flex items-start gap-6">
@@ -89,7 +98,24 @@ export class EventDetailsComponent implements AfterViewInit {
   @Input() reviews: EventReview[] = [];
   @Output() back = new EventEmitter<void>();
   private el = inject(ElementRef);
+
   ngAfterViewInit() { this.initRevealObserver(); }
+
+  handleAddReview(newReview: any) {
+    const reviewWithId: EventReview = { 
+      ...newReview, 
+      id: Math.floor(Math.random() * 10000), 
+      event_id: this.event.id 
+    };
+    this.reviews = [reviewWithId, ...this.reviews];
+    
+    // Scroll smoothly to the feedback section to show the new review
+    setTimeout(() => {
+      const reviewList = document.querySelector('app-event-reviews-list');
+      if (reviewList) reviewList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
   private initRevealObserver() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });

@@ -2,32 +2,64 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardComponent } from '../../components/dashboard.component.ts';
+import { FinanceViewComponent } from './finance-view.component.ts';
+import { ContractsViewComponent } from './contracts-view.component.ts';
+import { MaintenanceViewComponent } from './maintenance-view.component.ts';
+import { InfrastructureViewComponent } from './infrastructure-view.component.ts';
 
 @Component({
   selector: 'app-mall-view',
   standalone: true,
-  imports: [CommonModule, DashboardComponent],
+  imports: [
+    CommonModule, 
+    DashboardComponent, 
+    FinanceViewComponent, 
+    ContractsViewComponent, 
+    MaintenanceViewComponent,
+    InfrastructureViewComponent
+  ],
   template: `
     <div class="motion-slide-in">
-      <div class="mb-10">
-        <h2 class="text-xs font-black uppercase tracking-[0.3em] text-lumina-rust mb-2">General Management</h2>
-        <h1 class="text-4xl font-black text-lumina-olive font-outfit">Lumina Management</h1>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 border-b border-lumina-olive/5 pb-8">
+        <div>
+          <h2 class="text-xs font-black uppercase tracking-[0.4em] text-lumina-rust mb-2">MasterOne Control Center</h2>
+          <h1 class="text-4xl md:text-5xl font-black text-lumina-olive font-outfit uppercase tracking-tighter leading-none">{{ getModuleTitle() }}</h1>
+        </div>
       </div>
       
-      <app-dashboard 
-        [mallStats]="stats"
-        [trafficData]="traffic"
-        [mallSuggestions]="suggestions"
-        [loading]="loading"
-        (onRefresh)="onRefresh.emit()"
-      ></app-dashboard>
+      <div [ngSwitch]="activeModule" class="animate-in fade-in slide-in-from-bottom-5 duration-700">
+        <app-dashboard 
+          *ngSwitchCase="'mall'"
+          [mallStats]="stats"
+          [trafficData]="trafficData"
+          [mallSuggestions]="suggestions"
+          [loading]="loading"
+          (onRefresh)="onRefresh.emit()"
+        ></app-dashboard>
+
+        <app-infrastructure-view *ngSwitchCase="'infrastructure'"></app-infrastructure-view>
+        <app-finance-view *ngSwitchCase="'finance'"></app-finance-view>
+        <app-contracts-view *ngSwitchCase="'contracts'"></app-contracts-view>
+        <app-maintenance-view *ngSwitchCase="'maintenance'"></app-maintenance-view>
+      </div>
     </div>
   `
 })
 export class MallViewComponent {
+  @Input() activeModule: string = 'mall';
   @Input() stats: any[] = [];
-  @Input() traffic: any[] = [];
+  @Input() trafficData: any[] = []; // Propriété renommée pour cohérence
   @Input() suggestions: any[] = [];
   @Input() loading: boolean = false;
   @Output() onRefresh = new EventEmitter<void>();
+
+  getModuleTitle() {
+    switch(this.activeModule) {
+      case 'infrastructure': return 'Infrastructure Hub';
+      case 'finance': return 'Financial Ledger';
+      case 'contracts': return 'Merchant Directory';
+      case 'maintenance': return 'Maintenance Hub';
+      default: return 'Mall Intelligence';
+    }
+  }
 }
