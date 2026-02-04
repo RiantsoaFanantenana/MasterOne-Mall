@@ -14,140 +14,108 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
     <div class="space-y-12 animate-in fade-in duration-700">
       <!-- Section Tabs -->
       <div class="flex justify-between items-center mb-12 border-b border-lumina-olive/5 pb-10">
-        <div class="flex gap-8">
+        <div class="flex gap-6">
           <button (click)="view.set('list')" 
                   [ngClass]="view() === 'list' ? 'bg-lumina-olive text-white shadow-xl shadow-lumina-olive/20' : 'text-lumina-olive/40 hover:text-lumina-olive'" 
-                  class="px-12 py-4 rounded-[24px] font-black text-[11px] uppercase tracking-widest transition-all font-outfit">
-            Merchant Registry
+                  class="px-14 py-5 rounded-[24px] font-black text-[11px] uppercase tracking-[0.3em] transition-all font-outfit">
+            Registry
           </button>
           <button (click)="view.set('form')" 
                   [ngClass]="view() === 'form' ? 'bg-lumina-olive text-white shadow-xl shadow-lumina-olive/20' : 'text-lumina-olive/40 hover:text-lumina-olive'" 
-                  class="px-12 py-4 rounded-[24px] font-black text-[11px] uppercase tracking-widest transition-all font-outfit">
-            New Onboarding
+                  class="px-14 py-5 rounded-[24px] font-black text-[11px] uppercase tracking-[0.3em] transition-all font-outfit">
+            Onboarding
           </button>
         </div>
       </div>
 
       <!-- Merchant List View -->
-      <div *ngIf="view() === 'list'" class="bg-white rounded-[40px] border border-lumina-olive/10 shadow-sm overflow-hidden animate-in fade-in">
+      <div *ngIf="view() === 'list'" class="bg-white rounded-[60px] border border-lumina-olive/10 shadow-sm overflow-hidden animate-in fade-in">
         <table class="w-full text-left">
-          <tr class="bg-lumina-cream text-[10px] font-black uppercase tracking-widest text-lumina-olive/40 border-b border-lumina-olive/10">
-            <th class="px-10 py-10">Brand House</th>
-            <th class="px-10 py-10">Assigned Space</th>
-            <th class="px-10 py-10">Contract Status</th>
-            <th class="px-10 py-10 text-right">Protocol</th>
+          <tr class="bg-lumina-cream text-[10px] font-black uppercase tracking-[0.3em] text-lumina-olive/40 border-b border-lumina-olive/10">
+            <th class="px-12 py-12">Brand House</th>
+            <th class="px-12 py-12">Assigned Space</th>
+            <th class="px-12 py-12">Contract Status</th>
+            <th class="px-12 py-12 text-right">Protocol</th>
           </tr>
           <tr *ngFor="let s of directory()" app-merchant-row [merchant]="s" class="border-t border-lumina-olive/5 group transition-all"></tr>
         </table>
       </div>
 
       <!-- Onboarding Unified Form -->
-      <div *ngIf="view() === 'form'" class="bg-white p-12 lg:p-20 rounded-[60px] border border-lumina-olive/10 shadow-2xl max-w-6xl mx-auto animate-in zoom-in-95 duration-700">
-        <div class="flex items-center gap-10 mb-20">
-          <div class="w-20 h-20 bg-lumina-rust rounded-[32px] flex items-center justify-center text-white shadow-xl rotate-3">
-             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div *ngIf="view() === 'form'" class="bg-white p-14 lg:p-24 rounded-[80px] border border-lumina-olive/10 shadow-3xl max-w-7xl mx-auto animate-in zoom-in-95 duration-1000">
+        <div class="flex items-center gap-10 mb-24">
+          <div class="w-24 h-24 bg-lumina-rust rounded-[40px] flex items-center justify-center text-white shadow-3xl rotate-3">
+             <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
           <div>
-            <h3 class="text-4xl font-black text-lumina-olive uppercase tracking-tighter leading-none mb-4 font-outfit">Integration Protocol</h3>
-            <p class="text-[12px] font-black uppercase tracking-widest text-lumina-tan opacity-60 font-jakarta italic">Architecting excellence</p>
+            <h3 class="text-5xl font-black text-lumina-olive uppercase tracking-tighter leading-none mb-5 font-outfit">House Deployment</h3>
+            <p class="text-[14px] font-black uppercase tracking-[0.6em] text-lumina-tan opacity-60 italic font-jakarta leading-none">Architecting the future of retail</p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-20 gap-y-16">
-          <!-- Step 1: Merchant Profile -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-24 gap-y-16">
           <div class="space-y-12">
-            <h4 class="text-[10px] font-black uppercase tracking-widest text-lumina-tan border-b border-lumina-olive/5 pb-8 font-jakarta">1. Brand Identity</h4>
+            <h4 class="text-[12px] font-black uppercase tracking-[0.6em] text-lumina-tan border-b border-lumina-olive/5 pb-8">Core Identity</h4>
             
             <div class="space-y-3">
-              <label class="erp-label">Boutique Label</label>
-              <input [(ngModel)]="form.shop_name" placeholder="Elysian Garments" class="erp-input w-full" />
+              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Maison Nomenclature</label>
+              <input [(ngModel)]="form.shop_name" placeholder="Elysian Garments" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
             </div>
 
             <div class="space-y-3">
-              <label class="erp-label">Brand Segment</label>
-              <div class="relative">
-                <select [(ngModel)]="form.id_type" class="erp-input w-full appearance-none cursor-pointer pr-12">
-                  <option *ngFor="let t of data.shopTypes()" [value]="t.id">{{ t.type_name }}</option>
-                </select>
-                <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-              </div>
+              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Market Segment</label>
+              <select [(ngModel)]="form.id_type" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold outline-none transition-all appearance-none cursor-pointer text-lumina-olive text-sm">
+                <option *ngFor="let t of data.shopTypes()" [value]="t.id">{{ t.type_name }}</option>
+              </select>
             </div>
 
-            <div class="space-y-3">
-              <label class="erp-label">Maison Narrative</label>
-              <textarea [(ngModel)]="form.description" rows="5" placeholder="History..." 
-                        class="erp-input w-full resize-none py-6 rounded-[32px]"></textarea>
-            </div>
           </div>
 
-          <!-- Step 2: Operational Contract -->
           <div class="space-y-12">
-            <h4 class="text-[10px] font-black uppercase tracking-widest text-lumina-tan border-b border-lumina-olive/5 pb-8 font-jakarta">2. Commercial Lease</h4>
+            <h4 class="text-[12px] font-black uppercase tracking-[0.6em] text-lumina-tan border-b border-lumina-olive/5 pb-8">Commercial Terms</h4>
             
             <div class="space-y-3">
-              <label class="erp-label">Assign Mall Location</label>
-              <div class="relative">
-                <select [(ngModel)]="form.id_box" class="erp-input w-full appearance-none cursor-pointer pr-12">
-                  <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
-                </select>
-                <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-              </div>
+              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Assigned Atrium Location</label>
+              <select [(ngModel)]="form.id_box" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold outline-none transition-all appearance-none cursor-pointer text-lumina-olive text-sm">
+                <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
+              </select>
             </div>
             
-            <div class="space-y-3">
-              <label class="erp-label">Strategic Partnership Tier</label>
-              <div class="relative group">
-                <select [(ngModel)]="selectedSubId" (change)="onSubChange()" 
-                        class="erp-input w-full appearance-none cursor-pointer pr-40">
-                  <option *ngFor="let s of data.subscriptionTypes()" [value]="s.id">{{ s.name }}</option>
-                </select>
-                <div class="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 bg-lumina-rust text-white px-5 py-2 rounded-xl font-black text-[9px] shadow-lg uppercase tracking-widest leading-none font-outfit">
-                  {{ getSelectedSubPrice() }}€
-                </div>
-              </div>
-            </div>
 
-            <div class="grid grid-cols-2 gap-8">
+            <div class="grid grid-cols-2 gap-10">
               <div class="space-y-3">
-                <label class="erp-label">Inception Date</label>
-                <input type="date" [(ngModel)]="form.start_date" class="erp-input w-full" />
+                <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Commencement</label>
+                <input type="date" [(ngModel)]="form.start_date" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
               </div>
               <div class="space-y-3">
-                <label class="erp-label">Term Date</label>
-                <input type="date" [(ngModel)]="form.end_date" class="erp-input w-full" />
+                <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Termination</label>
+                <input type="date" [(ngModel)]="form.end_date" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
               </div>
             </div>
 
             <div class="space-y-3">
-              <label class="erp-label">Agreed Monthly Rent (€)</label>
-              <input type="number" [(ngModel)]="form.rent" class="erp-input w-full bg-lumina-olive/5" />
+              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Calculated Monthly Rent (€)</label>
+              <input type="number" [(ngModel)]="form.rent" class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">
             </div>
           </div>
         </div>
 
-        <div class="mt-24 pt-12 border-t border-lumina-olive/5 flex justify-end gap-10">
+        <div class="mt-32 pt-16 border-t border-lumina-olive/5 flex justify-end gap-12">
            <button (click)="view.set('list')" 
-                   class="px-10 py-5 font-black text-[10px] uppercase tracking-widest text-lumina-olive/30 hover:text-lumina-rust transition-colors font-outfit">
-             Discard
+                   class="px-14 py-6 font-black text-[12px] uppercase tracking-[0.5em] text-lumina-olive/30 hover:text-lumina-rust transition-colors font-outfit">
+             Cancel Protocol
            </button>
            <button (click)="createMerchant()" 
-                   class="px-14 py-5 bg-lumina-olive text-white rounded-[24px] font-black uppercase text-[12px] tracking-widest shadow-xl hover:bg-lumina-rust transition-all active:scale-95 font-outfit">
-             Deploy Merchant Protocol
+                   class="px-24 py-6 bg-lumina-olive text-white rounded-[40px] font-black uppercase text-[14px] tracking-[0.6em] shadow-3xl hover:bg-lumina-rust transition-all active:scale-95 font-outfit">
+             Deploy House Asset
            </button>
         </div>
       </div>
     </div>
 
     <style>
-      .erp-label { @apply text-[10px] font-black uppercase tracking-widest text-lumina-olive/40 ml-6 mb-2 block font-jakarta; }
-      .erp-input { @apply px-8 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-[24px] font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20; }
+      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-2 block font-jakarta; }
+      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-[32px] font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20; }
     </style>
   `
 })

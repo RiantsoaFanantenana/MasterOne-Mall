@@ -8,29 +8,29 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="bg-white p-10 lg:p-14 rounded-[48px] border border-lumina-olive/10 shadow-sm animate-in fade-in zoom-in-95 duration-700">
+    <div class="bg-white p-12 lg:p-14 rounded-[50px] border border-lumina-olive/10 shadow-sm animate-in fade-in zoom-in-95 duration-700">
       <div class="flex items-center gap-6 mb-12">
-        <div class="w-14 h-14 bg-lumina-tan rounded-2xl flex items-center justify-center text-white shadow-xl">
+        <div class="w-14 h-14 bg-lumina-tan rounded-[24px] flex items-center justify-center text-white shadow-xl -rotate-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <h3 class="text-3xl font-black text-lumina-olive font-outfit uppercase tracking-tighter">Merchant Categories</h3>
+        <h3 class="text-3xl font-black text-lumina-olive font-outfit uppercase tracking-tighter">Segment Architecture</h3>
       </div>
 
-      <div class="flex flex-col md:flex-row gap-8 lg:gap-10 items-end">
+      <div class="flex flex-col md:flex-row gap-10 items-end">
         <div class="flex-1 space-y-3 w-full">
-          <label class="erp-label">Category Title</label>
-          <input [(ngModel)]="name" placeholder="e.g. Haute Horlogerie" class="erp-input w-full" />
+          <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Category Protocol Name</label>
+          <input [(ngModel)]="name" placeholder="e.g. Haute Couture" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
         </div>
-        <button (click)="submit()" class="erp-button h-[64px] whitespace-nowrap">
-          Register Category
+        <button (click)="submit()" class="erp-button h-[70px] md:w-auto px-16">
+          Register Protocol
         </button>
       </div>
     </div>
 
     <style>
-      .erp-label { @apply text-[10px] font-black uppercase tracking-widest text-lumina-olive/40 ml-6 mb-2 block font-jakarta; }
-      .erp-input { @apply px-8 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-[24px] font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20; }
-      .erp-button { @apply px-10 py-4 bg-lumina-olive text-white rounded-[24px] font-black uppercase text-[11px] tracking-widest font-outfit shadow-xl hover:bg-lumina-rust transition-all active:scale-95; }
+      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-2 block font-jakarta; }
+      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20; }
+      .erp-button { @apply w-full px-8 py-4 bg-lumina-olive text-white rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] font-outfit shadow-2xl hover:bg-lumina-rust transition-all active:scale-95; }
     </style>
   `
 })

@@ -22,7 +22,7 @@ import { InfrastructureViewComponent } from './infrastructure-view.component.ts'
     <div class="motion-slide-in">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 border-b border-lumina-olive/5 pb-8">
         <div>
-          <h2 class="text-xs font-black uppercase tracking-[0.4em] text-lumina-rust mb-2">MasterOne Control Center</h2>
+          <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-lumina-rust mb-2 uppercase">MasterOne Operations Hub</h2>
           <h1 class="text-4xl md:text-5xl font-black text-lumina-olive font-outfit uppercase tracking-tighter leading-none">{{ getModuleTitle() }}</h1>
         </div>
       </div>
@@ -48,18 +48,18 @@ import { InfrastructureViewComponent } from './infrastructure-view.component.ts'
 export class MallViewComponent {
   @Input() activeModule: string = 'mall';
   @Input() stats: any[] = [];
-  @Input() trafficData: any[] = []; // Propriété renommée pour cohérence
+  @Input() trafficData: any[] = []; 
   @Input() suggestions: any[] = [];
   @Input() loading: boolean = false;
   @Output() onRefresh = new EventEmitter<void>();
 
   getModuleTitle() {
     switch(this.activeModule) {
-      case 'infrastructure': return 'Infrastructure Hub';
-      case 'finance': return 'Financial Ledger';
+      case 'infrastructure': return 'Space Architecture';
+      case 'finance': return 'Strategic Finance';
       case 'contracts': return 'Merchant Directory';
-      case 'maintenance': return 'Maintenance Hub';
-      default: return 'Mall Intelligence';
+      case 'maintenance': return 'Operations Control';
+      default: return 'Business Intelligence';
     }
   }
 }
