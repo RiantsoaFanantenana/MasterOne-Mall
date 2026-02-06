@@ -110,7 +110,7 @@ import { ChatComponent } from './components/chat.component.ts';
 
             <app-shop-view *ngIf="activeTab() === 'shop'"></app-shop-view>
             <app-client-view *ngIf="activeTab() === 'client'"></app-client-view>
-            <app-client-shops-view *ngIf="activeTab() === 'client-shops'"></app-client-shops-view>
+            <app-client-shops-view *ngIf="activeTab() === 'client-shops'" [isLoggedIn]="isLoggedIn()"></app-client-shops-view>
             <app-client-services-view *ngIf="activeTab() === 'client-services'"></app-client-services-view>
             <app-client-events-view *ngIf="activeTab() === 'client-events'"></app-client-events-view>
             <app-client-wallet-view *ngIf="activeTab() === 'client-wallet'"></app-client-wallet-view>

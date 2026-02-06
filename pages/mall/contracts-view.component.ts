@@ -58,44 +58,57 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             <h4 class="text-[12px] font-black uppercase tracking-[0.6em] text-lumina-tan border-b border-lumina-olive/5 pb-8">Core Identity</h4>
             
             <div class="space-y-3">
-              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Maison Nomenclature</label>
-              <input [(ngModel)]="form.shop_name" placeholder="Elysian Garments" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
+              <label class="erp-label">Maison Nomenclature</label>
+              <input [(ngModel)]="form.shop_name" placeholder="Elysian Garments" class="erp-input" />
             </div>
 
             <div class="space-y-3">
-              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Market Segment</label>
-              <select [(ngModel)]="form.id_type" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold outline-none transition-all appearance-none cursor-pointer text-lumina-olive text-sm">
-                <option *ngFor="let t of data.shopTypes()" [value]="t.id">{{ t.type_name }}</option>
-              </select>
+              <label class="erp-label">Market Segment</label>
+              <div class="relative group">
+                <select [(ngModel)]="form.id_type" class="erp-input appearance-none pr-14 cursor-pointer">
+                  <option *ngFor="let t of data.shopTypes()" [value]="t.id">{{ t.type_name }}</option>
+                </select>
+                <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
             </div>
 
+            <div class="space-y-3">
+              <label class="erp-label">Narrative Heritage</label>
+              <textarea [(ngModel)]="form.description" rows="5" placeholder="Tell the story of the brand..." class="erp-input resize-none py-6 leading-relaxed"></textarea>
+            </div>
           </div>
 
           <div class="space-y-12">
             <h4 class="text-[12px] font-black uppercase tracking-[0.6em] text-lumina-tan border-b border-lumina-olive/5 pb-8">Commercial Terms</h4>
             
             <div class="space-y-3">
-              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Assigned Atrium Location</label>
-              <select [(ngModel)]="form.id_box" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold outline-none transition-all appearance-none cursor-pointer text-lumina-olive text-sm">
-                <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
-              </select>
+              <label class="erp-label">Assigned Atrium Location</label>
+              <div class="relative group">
+                <select [(ngModel)]="form.id_box" class="erp-input appearance-none pr-14 cursor-pointer">
+                  <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
+                </select>
+                <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
             </div>
-            
 
             <div class="grid grid-cols-2 gap-10">
               <div class="space-y-3">
-                <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Commencement</label>
-                <input type="date" [(ngModel)]="form.start_date" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
+                <label class="erp-label">Commencement</label>
+                <input type="date" [(ngModel)]="form.start_date" class="erp-input" />
               </div>
               <div class="space-y-3">
-                <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Termination</label>
-                <input type="date" [(ngModel)]="form.end_date" class="w-full px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl outline-none font-bold text-lumina-olive" />
+                <label class="erp-label">Termination</label>
+                <input type="date" [(ngModel)]="form.end_date" class="erp-input" />
               </div>
             </div>
 
             <div class="space-y-3">
-              <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">Calculated Monthly Rent (€)</label>
-              <input type="number" [(ngModel)]="form.rent" class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/60 ml-4">
+              <label class="erp-label">Agreed Monthly Rent (€)</label>
+              <input type="number" [(ngModel)]="form.rent" class="erp-input bg-white/50" />
             </div>
           </div>
         </div>
@@ -114,8 +127,8 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
     </div>
 
     <style>
-      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-2 block font-jakarta; }
-      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-[32px] font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20; }
+      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta; }
+      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20; }
     </style>
   `
 })

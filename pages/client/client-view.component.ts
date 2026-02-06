@@ -80,9 +80,9 @@ export class ClientViewComponent implements AfterViewInit {
   ];
 
   shopsCarousel = [
-    { name: 'Aurea Couture', category: 'Ready-to-wear', floor: '1', image: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?auto=format&fit=crop&q=80&w=800' },
-    { name: 'Obsidian Jewelry', category: 'Jewelry', floor: '0', image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800' },
-    { name: 'Terra Moda', category: 'Accessories', floor: '2', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&q=80&w=800' },
+    { user_id: 10, id_type: 1, id_box: 'A-102', shop_name: 'Elysian Garments', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', cover_pic: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200', description: 'The pinnacle of French luxury fashion. Every stitch tells a story of heritage and innovation.' },
+    { user_id: 11, id_type: 2, id_box: 'B-05', shop_name: 'Stellar Gems', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=SG', cover_pic: 'https://images.unsplash.com/photo-1573408339311-259bfa032d31?auto=format&fit=crop&q=80&w=1200', description: 'Rare stones and bespoke jewelry design for those who appreciate true brilliance.' },
+    { user_id: 12, id_type: 3, id_box: 'C-22', shop_name: 'L’Art du Chocolat', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=AC', cover_pic: 'https://images.unsplash.com/photo-1548907040-4baa42d100c9?auto=format&fit=crop&q=80&w=1200', description: 'An odyssey of taste through cocoa beans selected from the world\'s most prestigious plantations.' },
   ];
 
   featuredServices = [

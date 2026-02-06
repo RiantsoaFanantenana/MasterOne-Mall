@@ -1,44 +1,100 @@
-
-import { Component, AfterViewInit, ElementRef, inject, signal, effect, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject, signal, effect, OnInit, Input, computed, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ShopListComponent, ShopType, ShopProfile } from './components/shop-list.component.ts';
 import { ShopDetailsComponent, ShopReview } from './components/shop-details.component.ts';
+import { ShopItemComponent } from './components/shop-item.component.ts';
 import { FooterComponent } from './components/footer.component.ts';
+import { ShopCarouselComponent } from './components/shop-carousel.component.ts';
 
 @Component({
   selector: 'app-client-shops-view',
   standalone: true,
-  imports: [CommonModule, ShopListComponent, ShopDetailsComponent, FooterComponent],
+  imports: [CommonModule, ShopListComponent, ShopDetailsComponent, ShopItemComponent, ShopCarouselComponent, FooterComponent],
   template: `
     <div class="bg-white min-h-screen flex flex-col motion-slide-in">
       <div class="flex-1">
-        <!-- List View -->
-        <app-shop-list 
-          *ngIf="!selectedShop()"
-          [shopTypes]="shopTypes" 
-          [shops]="allShops"
-          (onSelect)="handleShopSelect($event)"
-        ></app-shop-list>
 
-        <!-- Detail View -->
+        <!-- DETAIL VIEW -->
         <app-shop-details
           *ngIf="selectedShop()"
           [shop]="selectedShop()!"
           [events]="getEventsForShop(selectedShop()?.user_id)"
           [discounts]="getDiscountsForShop(selectedShop()?.user_id)"
           [reviews]="getReviewsForShop(selectedShop()?.user_id)"
+          [isLoggedIn]="isLoggedIn"
+          [isFavorite]="isShopFavorite(selectedShop()?.user_id)"
           (back)="handleBackToDirectory()"
+          (onFavoriteToggle)="toggleFavorite(selectedShop()?.user_id)"
         ></app-shop-details>
+
+        <!-- LIST VIEW CONTAINER -->
+        <ng-container *ngIf="!selectedShop()">
+          
+          <!-- EXCLUSIVE FAVORITES SECTION (Dark Background) -->
+          <app-shop-carousel 
+            *ngIf="isLoggedIn && favorites().size > 0" 
+            [items]="favoriteShops()"
+            [isLoggedIn]="isLoggedIn"
+            title="Your Favorites"
+            subtitle="See your most liked boutiques"
+          ></app-shop-carousel>
+
+          <!-- If logged in but no favorites -->
+          <div *ngIf="isLoggedIn && favorites().size === 0" class="bg-gray-100 py-16 text-center">
+            <div class="max-w-2xl mx-auto px-4">
+              <div class="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-gray-800 mb-2">No favorites yet</h3>
+              <p class="text-gray-600 mb-6">Click the heart icon on any boutique to add it to your favorites</p>
+              <button (click)="addTestFavorites()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
+                Add Sample Favorites (for testing)
+              </button>
+            </div>
+          </div>
+
+          <!-- MAIN DIRECTORY -->
+          <app-shop-list 
+            [shopTypes]="shopTypes" 
+            [shops]="allShops"
+            [isLoggedIn]="isLoggedIn"
+            [favorites]="favorites()"
+            (onSelect)="handleShopSelect($event)"
+            (onFavoriteToggle)="toggleFavorite($event)"
+          ></app-shop-list>
+        </ng-container>
+
       </div>
       <app-footer></app-footer>
     </div>
   `
 })
-export class ClientShopsViewComponent implements OnInit, AfterViewInit {
+export class ClientShopsViewComponent implements OnInit, AfterViewInit, OnChanges {
+  @Input() isLoggedIn: boolean = false;
   private el = inject(ElementRef);
   selectedShop = signal<ShopProfile | null>(null);
+  
+  // AJOUTEZ DES FAVORIS PAR DÉFAUT POUR TESTER
+  favorites = signal<Set<number>>(new Set([10, 11])); // IDs 10 et 11 sont favoris par défaut
+
+  favoriteShops = computed(() => {
+    const result = this.allShops.filter(s => this.favorites().has(s.user_id));
+    console.log('🔍 favoriteShops computed:', {
+      isLoggedIn: this.isLoggedIn,
+      favorites: Array.from(this.favorites()),
+      resultCount: result.length,
+      result: result.map(s => ({ id: s.user_id, name: s.shop_name }))
+    });
+    return result;
+  });
 
   constructor() {
+    console.log('🔄 ClientShopsViewComponent constructor');
+    console.log('Initial isLoggedIn:', this.isLoggedIn);
+    console.log('Initial favorites:', Array.from(this.favorites()));
+    
     effect(() => {
       const shop = this.selectedShop();
       try {
@@ -55,7 +111,6 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
         console.warn('Navigation state update blocked:', e);
       }
       
-      // Laisser le temps au DOM de se construire avant d'initialiser l'observateur
       setTimeout(() => {
         this.initRevealObserver();
         if (shop) window.scrollTo({ top: 0, behavior: 'instant' });
@@ -63,7 +118,19 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
     });
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('📈 ngOnChanges:', changes);
+    if (changes['isLoggedIn']) {
+      console.log('isLoggedIn changed from', changes['isLoggedIn'].previousValue, 'to', changes['isLoggedIn'].currentValue);
+    }
+  }
+
   ngOnInit() {
+    console.log('🚀 ClientShopsViewComponent ngOnInit');
+    console.log('Current isLoggedIn:', this.isLoggedIn);
+    console.log('Current favorites:', Array.from(this.favorites()));
+    console.log('Current favoriteShops:', this.favoriteShops());
+    
     const params = new URLSearchParams(window.location.search);
     const shopId = params.get('shopId');
     if (shopId) {
@@ -72,7 +139,47 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // Méthodes de débogage
+  addTestFavorites() {
+    console.log('➕ Adding test favorites...');
+    this.favorites.set(new Set([10, 11, 12, 13])); // Toutes les boutiques
+    console.log('Favorites après ajout:', Array.from(this.favorites()));
+  }
+
+  clearFavorites() {
+    console.log('🗑️ Clearing favorites...');
+    this.favorites.set(new Set());
+    console.log('Favorites après nettoyage:', Array.from(this.favorites()));
+  }
+
+  isShopFavorite(userId: number | undefined) {
+    const isFav = userId ? this.favorites().has(userId) : false;
+    console.log('❤️ isShopFavorite:', { userId, isFav });
+    return isFav;
+  }
+
+  toggleFavorite(userId: number | undefined) {
+    console.log('🔄 toggleFavorite called for userId:', userId);
+    console.log('Avant:', Array.from(this.favorites()));
+    
+    if (!userId) return;
+    
+    this.favorites.update(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) {
+        next.delete(userId);
+        console.log('❌ Retiré du favori');
+      } else {
+        next.add(userId);
+        console.log('✅ Ajouté aux favoris');
+      }
+      console.log('Après:', Array.from(next));
+      return next;
+    });
+  }
+
   ngAfterViewInit() {
+    console.log('🎬 ngAfterViewInit');
     this.initRevealObserver();
   }
 
@@ -93,10 +200,12 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
   }
 
   handleShopSelect(shop: ShopProfile) {
+    console.log('🏪 Shop selected:', shop.shop_name);
     this.selectedShop.set(shop);
   }
 
   handleBackToDirectory() {
+    console.log('🔙 Back to directory');
     this.selectedShop.set(null);
   }
 
@@ -110,7 +219,7 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
   allShops: ShopProfile[] = [
     { user_id: 10, id_type: 1, id_box: 'A-102', shop_name: 'Elysian Garments', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', cover_pic: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200', description: 'The pinnacle of French luxury fashion. Every stitch tells a story of heritage and innovation.' },
     { user_id: 11, id_type: 2, id_box: 'B-05', shop_name: 'Stellar Gems', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=SG', cover_pic: 'https://images.unsplash.com/photo-1573408339311-259bfa032d31?auto=format&fit=crop&q=80&w=1200', description: 'Rare stones and bespoke jewelry design for those who appreciate true brilliance.' },
-    { user_id: 12, id_type: 3, id_box: 'C-22', shop_name: 'L’Art du Chocolat', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=AC', cover_pic: 'https://images.unsplash.com/photo-1548907040-4baa42d100c9?auto=format&fit=crop&q=80&w=1200', description: 'An odyssey of taste through cocoa beans selected from the world\'s most prestigious plantations.' },
+    { user_id: 12, id_type: 3, id_box: 'C-22', shop_name: 'L\'Art du Chocolat', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=AC', cover_pic: 'https://images.unsplash.com/photo-1548907040-4baa42d100c9?auto=format&fit=crop&q=80&w=1200', description: 'An odyssey of taste through cocoa beans selected from the world\'s most prestigious plantations.' },
     { user_id: 13, id_type: 4, id_box: 'A-12', shop_name: 'Velvet Skin', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=VS', cover_pic: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200', description: 'Exclusive beauty rituals and advanced skincare treatments in a sanctuary of peace.' }
   ];
 
@@ -143,7 +252,7 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
       { id: 1, shop_user_id: 10, create_at: '2024-10-15', shop_id: 'A-102', client_id: 'Julian R.', description: 'The tailoring is world-class. A truly Parisian experience.', stars: 10 },
       { id: 2, shop_user_id: 10, create_at: '2024-11-02', shop_id: 'A-102', client_id: 'Elena M.', description: 'Attentive service and beautiful showroom.', stars: 9 },
       { id: 3, shop_user_id: 11, create_at: '2024-11-20', shop_id: 'B-05', client_id: 'Thomas L.', description: 'Found the perfect gift. The gems are breathtaking.', stars: 10 },
-      { id: 4, shop_user_id: 12, create_at: '2024-11-21', shop_id: 'C-22', client_id: 'Sarah K.', description: 'Best pralines in the city. The dark chocolate is a must-try.', stars: 10 },
+      { id: 4, shop_user_id: 12, create_at: '2024-11-21', shop_id: 'C-22', client_id: 'Sarah K.', description: 'Best pralines in the city. The dark chocolate is a must try.', stars: 10 },
       { id: 5, shop_user_id: 13, create_at: '2024-11-23', shop_id: 'A-12', client_id: 'Marc V.', description: 'My skin has never looked better. Worth every cent.', stars: 10 }
     ];
     return allReviews.filter(r => r.shop_user_id === userId);

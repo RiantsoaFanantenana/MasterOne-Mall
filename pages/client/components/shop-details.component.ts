@@ -41,9 +41,23 @@ export interface ShopReview {
              <span class="text-xs font-black text-lumina-olive leading-none">Box {{ shop.id_box }}</span>
            </div>
            <div class="h-10 w-[1px] bg-lumina-olive/10 hidden sm:block"></div>
-           <button class="w-11 h-11 rounded-2xl border border-lumina-olive/10 flex items-center justify-center hover:bg-lumina-cream transition-colors shadow-sm">
-             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-           </button>
+           
+           <div class="flex gap-4">
+             <button *ngIf="isLoggedIn" 
+                     (click)="onFavoriteToggle.emit()" 
+                     class="w-12 h-12 rounded-2xl border flex items-center justify-center transition-all shadow-inner shadow-black/5"
+                     [ngClass]="isFavorite ? 'bg-lumina-rust text-white border-lumina-rust' : 'bg-lumina-cream border-lumina-olive/10 text-lumina-olive hover:bg-white'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" 
+                     [attr.fill]="isFavorite ? 'currentColor' : 'none'" 
+                     stroke="currentColor" stroke-width="2.5">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.505 4.04 3 5.5L12 21l7-7Z"/>
+                </svg>
+             </button>
+
+             <button class="w-12 h-12 rounded-2xl border border-lumina-olive/10 bg-lumina-cream flex items-center justify-center hover:bg-white transition-colors shadow-inner shadow-black/5 text-lumina-olive">
+               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+             </button>
+           </div>
         </div>
       </div>
 
@@ -59,7 +73,7 @@ export interface ShopReview {
               <span class="bg-lumina-rust text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-lumina-rust/20">MasterOne House Exclusive</span>
               <span class="bg-lumina-olive text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-lumina-olive/20">Master Floor</span>
             </div>
-            <h1 class="text-7xl md:text-[10rem] font-black font-outfit text-lumina-olive tracking-tighter leading-none mb-4">{{ shop.shop_name }}</h1>
+            <h1 class="text-7xl md:text-[10rem] font-black font-outfit text-lumina-olive tracking-tighter leading-none mb-4 uppercase">{{ shop.shop_name }}</h1>
           </div>
         </div>
       </section>
@@ -95,7 +109,11 @@ export class ShopDetailsComponent implements AfterViewInit {
   @Input() events: any[] = [];
   @Input() discounts: any[] = [];
   @Input() reviews: ShopReview[] = [];
+  @Input() isLoggedIn: boolean = false;
+  @Input() isFavorite: boolean = false;
   @Output() back = new EventEmitter<void>();
+  @Output() onFavoriteToggle = new EventEmitter<void>();
+  
   private el = inject(ElementRef);
 
   ngAfterViewInit() { this.initLocalRevealObserver(); }

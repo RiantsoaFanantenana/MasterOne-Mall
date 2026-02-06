@@ -10,6 +10,18 @@ import { CommonModule } from '@angular/common';
     <div class="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer shadow-xl reveal motion-item"
          [ngClass]="staggerClass">
       
+      <!-- Favorite Button -->
+      <button *ngIf="isLoggedIn" 
+              (click)="toggleFavorite($event)" 
+              class="absolute top-6 right-6 z-30 w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-md flex items-center justify-center shadow-xl border border-white transition-all hover:scale-110 active:scale-90">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" 
+             [attr.fill]="isFavorite ? '#8C4A33' : 'none'" 
+             [attr.stroke]="isFavorite ? '#8C4A33' : '#646E57'" 
+             stroke-width="2.5" class="transition-colors duration-300">
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.505 4.04 3 5.5L12 21l7-7Z"/>
+        </svg>
+      </button>
+
       <!-- Cover Pic -->
       <img [src]="coverPic" class="absolute inset-0 w-full h-full object-cover transition-transform duration-[4000ms] group-hover:scale-110" />
       <div class="absolute inset-0 bg-gradient-to-t from-lumina-dark/90 via-lumina-dark/20 to-transparent"></div>
@@ -50,5 +62,13 @@ export class ShopItemComponent {
   @Input() name!: string;
   @Input() description!: string;
   @Input() staggerClass: string = '';
+  @Input() isLoggedIn: boolean = false;
+  @Input() isFavorite: boolean = false;
   @Output() select = new EventEmitter<void>();
+  @Output() onFavoriteToggle = new EventEmitter<void>();
+
+  toggleFavorite(event: Event) {
+    event.stopPropagation();
+    this.onFavoriteToggle.emit();
+  }
 }
