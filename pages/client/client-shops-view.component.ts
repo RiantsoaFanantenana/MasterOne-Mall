@@ -208,10 +208,10 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit, OnChange
   ];
 
   allShops: ShopProfile[] = [
-    { user_id: 10, id_type: 1, id_box: 'A-102', shop_name: 'Elysian Garments', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', cover_pic: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200', description: 'The pinnacle of French luxury fashion. Every stitch tells a story of heritage and innovation.' },
-    { user_id: 11, id_type: 2, id_box: 'B-05', shop_name: 'Stellar Gems', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=SG', cover_pic: 'https://images.unsplash.com/photo-1573408339311-259bfa032d31?auto=format&fit=crop&q=80&w=1200', description: 'Rare stones and bespoke jewelry design for those who appreciate true brilliance.' },
-    { user_id: 12, id_type: 3, id_box: 'C-22', shop_name: 'L\'Art du Chocolat', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=AC', cover_pic: 'https://images.unsplash.com/photo-1548907040-4baa42d100c9?auto=format&fit=crop&q=80&w=1200', description: 'An odyssey of taste through cocoa beans selected from the world\'s most prestigious plantations.' },
-    { user_id: 13, id_type: 4, id_box: 'A-12', shop_name: 'Velvet Skin', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=VS', cover_pic: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200', description: 'Exclusive beauty rituals and advanced skincare treatments in a sanctuary of peace.' }
+    { user_id: 10, id_type: 1, id_box: 'BOX-C1', shop_name: 'Elysian Garments', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', cover_pic: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200', description: 'The pinnacle of French luxury fashion. Every stitch tells a story of heritage and innovation.' },
+    { user_id: 11, id_type: 2, id_box: 'BOX-B5', shop_name: 'Stellar Gems', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=SG', cover_pic: 'https://images.unsplash.com/photo-1573408339311-259bfa032d31?auto=format&fit=crop&q=80&w=1200', description: 'Rare stones and bespoke jewelry design for those who appreciate true brilliance.' },
+    { user_id: 12, id_type: 3, id_box: 'BOX-A2', shop_name: 'L\'Art du Chocolat', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=AC', cover_pic: 'https://images.unsplash.com/photo-1548907040-4baa42d100c9?auto=format&fit=crop&q=80&w=1200', description: 'An odyssey of taste through cocoa beans selected from the world\'s most prestigious plantations.' },
+    { user_id: 13, id_type: 4, id_box: 'BOX-A6', shop_name: 'Velvet Skin', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=VS', cover_pic: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200', description: 'Exclusive beauty rituals and advanced skincare treatments in a sanctuary of peace.' }
   ];
 
   getEventsForShop(userId: number | undefined) {
@@ -240,11 +240,11 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit, OnChange
   getReviewsForShop(userId: number | undefined): ShopReview[] {
     if (userId === undefined) return [];
     const allReviews: (ShopReview & { shop_user_id: number })[] = [
-      { id: 1, shop_user_id: 10, create_at: '2024-10-15', shop_id: 'A-102', client_id: 'Julian R.', description: 'The tailoring is world-class. A truly Parisian experience.', stars: 10 },
-      { id: 2, shop_user_id: 10, create_at: '2024-11-02', shop_id: 'A-102', client_id: 'Elena M.', description: 'Attentive service and beautiful showroom.', stars: 9 },
-      { id: 3, shop_user_id: 11, create_at: '2024-11-20', shop_id: 'B-05', client_id: 'Thomas L.', description: 'Found the perfect gift. The gems are breathtaking.', stars: 10 },
-      { id: 4, shop_user_id: 12, create_at: '2024-11-21', shop_id: 'C-22', client_id: 'Sarah K.', description: 'Best pralines in the city. The dark chocolate is a must try.', stars: 10 },
-      { id: 5, shop_user_id: 13, create_at: '2024-11-23', shop_id: 'A-12', client_id: 'Marc V.', description: 'My skin has never looked better. Worth every cent.', stars: 10 }
+      { id: 1, shop_user_id: 10, create_at: '2024-10-15', shop_id: 'BOX-C1', client_id: 'Julian R.', description: 'The tailoring is world-class. A truly Parisian experience.', stars: 10 },
+      { id: 2, shop_user_id: 10, create_at: '2024-11-02', shop_id: 'BOX-C1', client_id: 'Elena M.', description: 'Attentive service and beautiful showroom.', stars: 9 },
+      { id: 3, shop_user_id: 11, create_at: '2024-11-20', shop_id: 'BOX-B5', client_id: 'Thomas L.', description: 'Found the perfect gift. The gems are breathtaking.', stars: 10 },
+      { id: 4, shop_user_id: 12, create_at: '2024-11-21', shop_id: 'BOX-A2', client_id: 'Sarah K.', description: 'Best pralines in the city. The dark chocolate is a must try.', stars: 10 },
+      { id: 5, shop_user_id: 13, create_at: '2024-11-23', shop_id: 'BOX-A6', client_id: 'Marc V.', description: 'My skin has never looked better. Worth every cent.', stars: 10 }
     ];
     return allReviews.filter(r => r.shop_user_id === userId);
   }

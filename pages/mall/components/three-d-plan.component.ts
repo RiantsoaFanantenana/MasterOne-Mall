@@ -1,5 +1,5 @@
 
-import { Component, Input, signal, computed, AfterViewInit } from '@angular/core';
+import { Component, Input, signal, computed, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -124,15 +124,14 @@ interface Floor {
               <svg 
                 class="absolute pointer-events-auto overflow-visible cursor-pointer"
                 style="width: 8000px; height: 8000px; left: 0; top: 0;"
-                [style.transform]="'translateZ(' + (selectedRoomId === room.id ? 15 : getRoomDepthZ(room)) + 'px)'"
-                (click)="onRoomClick(room.id)">
+                [style.transform]="'translateZ(' + (selectedRoomId === room.name ? 15 : getRoomDepthZ(room)) + 'px)'">
                 <polygon 
                   [attr.points]="getRoomPointsString(room.points)"
                   [attr.fill]="getRoomColor(room)"
-                  [attr.fill-opacity]="selectedRoomId === room.id ? 0.9 : (room.category === 'parking' ? 0.08 : 0.15)"
-                  [attr.stroke]="selectedRoomId === room.id ? '#8C4A33' : getRoomColor(room)"
-                  [attr.stroke-width]="selectedRoomId === room.id ? 3 : 1"
-                  [attr.stroke-opacity]="selectedRoomId === room.id ? 1 : 0.4"
+                  [attr.fill-opacity]="selectedRoomId === room.name ? 0.9 : (room.category === 'parking' ? 0.08 : 0.15)"
+                  [attr.stroke]="selectedRoomId === room.name ? '#8C4A33' : getRoomColor(room)"
+                  [attr.stroke-width]="selectedRoomId === room.name ? 3 : 1"
+                  [attr.stroke-opacity]="selectedRoomId === room.name ? 1 : 0.4"
                   [attr.stroke-dasharray]="room.category === 'parking' ? '4 4' : 'none'"
                   class="transition-all duration-500"
                 />
@@ -176,20 +175,6 @@ interface Floor {
                 </ng-container>
               </ng-container>
 
-              <!-- LUXURY LABELS -->
-              <div 
-                class="absolute whitespace-nowrap px-4 py-2 rounded-2xl backdrop-blur-xl border border-white/50 shadow-2xl transition-all duration-500"
-                [style.left.px]="mToPx(getRoomCenter(room).x)"
-                [style.top.px]="mToPx(getRoomCenter(room).y)"
-                [style.transform]="'translate(-50%, -50%) translateZ(' + (selectedRoomId === room.id ? 80 : 40) + 'px)'"
-                [ngClass]="selectedRoomId === room.id ? 'bg-lumina-rust text-white scale-110 shadow-lumina-rust/30' : 'bg-white/90 text-lumina-olive scale-100'">
-                <div class="flex flex-col items-center gap-1">
-                  <span class="text-[9px] font-black uppercase tracking-[0.3em]">{{ room.name }}</span>
-                  <span *ngIf="room.category === 'parking'" class="text-[7px] font-bold uppercase opacity-60">
-                    {{ getTotalParkingSpots(room) }} LUX Slots
-                  </span>
-                </div>
-              </div>
             </div>
           </ng-container>
         </ng-container>
@@ -235,6 +220,34 @@ interface Floor {
             </ng-container>
           </ng-container>
         </ng-container>
+
+        <!-- ROOMS -->
+        <ng-container *ngIf="currentFloor()?.rooms">
+          <ng-container *ngFor="let room of currentFloor().rooms">
+            <div [attr.key]="room.id" [style.transform-style]="'preserve-3d'">
+
+              <!-- LUXURY LABELS (RESIZED FOR VISIBILITY) -->
+              <div 
+                class="absolute whitespace-nowrap px-6 py-3 rounded-[24px] backdrop-blur-xl border-2 transition-all duration-500 z-50 shadow-2xl"
+                [style.left.px]="mToPx(getRoomCenter(room).x)"
+                [style.top.px]="mToPx(getRoomCenter(room).y)"
+                [style.transform]="'translate(-50%, -50%) translateZ(65px)'"
+                [ngClass]="selectedRoomId === room.name ? 'bg-lumina-rust text-white scale-125 border-white shadow-lumina-rust/40' : 'bg-white text-lumina-olive scale-100 border-lumina-olive/10'">
+                <div class="flex flex-col items-center gap-1.5">
+                  <span class="text-[11px] font-black uppercase tracking-[0.3em] leading-none">{{ selectedShop && selectedShop.id_box === room.name ? selectedShop.shop_name : room.name }}</span>
+                  <div class="w-full h-[1px] bg-current opacity-10 my-0.5"></div>
+                  <span *ngIf="room.category === 'parking'" class="text-[9px] font-bold uppercase opacity-60 tracking-wider">
+                    {{ getTotalParkingSpots(room) }} LUX Slots
+                  </span>
+                  <span *ngIf="room.category === 'shop'" class="text-[9px] font-black uppercase opacity-60 tracking-tighter">
+                    Maison d'Excellence
+                  </span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+        
       </div>
     </div>
   `,
@@ -244,10 +257,12 @@ interface Floor {
     .animate-pulse-gentle { animation: pulse-gentle 3s ease-in-out infinite; }
   `]
 })
-export class ThreeDPlanComponent implements AfterViewInit {
+export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
   @Input() floors: Floor[] = [];
   @Input() selectedRoomId: string | null = null;
+  @Input() selectedShop: {} | null = null;
   @Input() selectedSpotId: string | null = null;
+  @Input() initialFloorIndex: number = 0;
   
   readonly MALL_RATIO = 35;
   readonly BRICK_HEIGHT = 16;
@@ -270,7 +285,15 @@ export class ThreeDPlanComponent implements AfterViewInit {
   bounds = computed(() => this.calculateBounds());
   center = computed(() => this.calculateCenter());
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    this.activeFloorIndex.set(this.initialFloorIndex);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['initialFloorIndex'] && changes['initialFloorIndex'].currentValue !== undefined) {
+      this.activeFloorIndex.set(changes['initialFloorIndex'].currentValue);
+    }
+  }
 
   onRoomClick(id: string) {
     this.selectedRoomId = (this.selectedRoomId === id) ? null : id;

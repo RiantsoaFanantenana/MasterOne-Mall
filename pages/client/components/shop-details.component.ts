@@ -1,11 +1,13 @@
 
-import { Component, Input, Output, EventEmitter, AfterViewInit, ElementRef, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, AfterViewInit, ElementRef, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MasterDataService } from '../../../services/master-data.service.ts';
 import { ShopProfile } from './shop-list.component.ts';
 import { ShopReviewsListComponent } from './shop-reviews-list.component.ts';
 import { ShopEventsListComponent } from './shop-events-list.component.ts';
 import { ShopDiscountsListComponent } from './shop-discounts-list.component.ts';
 import { ShopReviewFormComponent } from './shop-review-form.component.ts';
+import { ThreeDPlanComponent } from '../../mall/components/three-d-plan.component.ts';
 
 export interface ShopReview {
   id: number;
@@ -24,7 +26,8 @@ export interface ShopReview {
     ShopReviewsListComponent,
     ShopEventsListComponent,
     ShopDiscountsListComponent,
-    ShopReviewFormComponent
+    ShopReviewFormComponent,
+    ThreeDPlanComponent
   ],
   template: `
     <div class="bg-white min-h-screen pb-40 animate-in fade-in duration-700">
@@ -87,6 +90,29 @@ export interface ShopReview {
             </div>
             <p class="text-3xl md:text-5xl text-lumina-olive leading-tight font-medium font-outfit max-w-5xl">{{ shop.description }}</p>
           </div>
+
+          <!-- 3D LOCATION SECTION -->
+          <div class="reveal pt-20 border-t border-lumina-olive/5">
+            <div class="flex items-center justify-between mb-16">
+              <div class="flex items-center gap-8">
+                <span class="w-24 h-[3px] bg-lumina-rust"></span>
+                <h3 class="text-sm font-black uppercase tracking-[0.6em] text-lumina-tan">Location Protocol</h3>
+              </div>
+              <div class="bg-lumina-cream px-6 py-3 rounded-2xl border border-lumina-olive/10">
+                <p class="text-[10px] font-black uppercase text-lumina-olive/40 tracking-[0.3em]">Architectural View • Level {{ shopFloorIndex() }}</p>
+              </div>
+            </div>
+            
+            <div class="rounded-[60px] overflow-hidden shadow-3xl border border-lumina-olive/10 bg-lumina-cream">
+              <app-three-d-plan 
+                [floors]="data.mallFloors()"
+                [selectedRoomId]="shop.id_box"
+                [selectedShop]="shop"
+                [initialFloorIndex]="shopFloorIndex()"
+              ></app-three-d-plan>
+            </div>
+          </div>
+
           <div class="space-y-24">
             <app-shop-reviews-list [reviews]="reviews"></app-shop-reviews-list>
             <div class="pt-12 border-t border-lumina-olive/5">
@@ -105,6 +131,7 @@ export interface ShopReview {
   `
 })
 export class ShopDetailsComponent implements AfterViewInit {
+  data = inject(MasterDataService);
   @Input() shop!: ShopProfile;
   @Input() events: any[] = [];
   @Input() discounts: any[] = [];
@@ -115,6 +142,12 @@ export class ShopDetailsComponent implements AfterViewInit {
   @Output() onFavoriteToggle = new EventEmitter<void>();
   
   private el = inject(ElementRef);
+
+  shopFloorIndex = computed(() => {
+    const floors = this.data.mallFloors();
+    const idx = floors.findIndex(f => f.rooms.some((r: any) => r.name === this.shop.id_box));
+    return idx >= 0 ? idx : 1; // Default to Floor 1 if not found
+  });
 
   ngAfterViewInit() { this.initLocalRevealObserver(); }
 
