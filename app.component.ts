@@ -97,7 +97,7 @@ import { ChatComponent } from './components/chat.component.ts';
           </div>
 
           <!-- Router Simulator -->
-          <div [ngClass]="isClientMode() ? 'w-full' : 'max-w-7xl mx-auto w-full p-6 md:p-12 lg:p-16'">
+          <div [ngClass]="isClientMode() ? 'w-full' : 'max-w-[1920px] mx-auto w-full p-6 md:p-12 lg:p-16'">
             <app-mall-view 
               *ngIf="isAdminTab()"
               [activeModule]="activeTab()"

@@ -21,8 +21,8 @@ import { CommonModule } from '@angular/common';
         </div>
         <div class="flex items-center gap-4">
            <span *ngIf="isLoggedIn" class="text-lumina-mint flex items-center gap-1.5">
-             <span class="w-1 h-1 rounded-full bg-lumina-mint animate-pulse"></span>
-             Active
+             <span class="w-1.5 h-1.5 rounded-full bg-lumina-mint animate-pulse"></span>
+             VIP Session Active
            </span>
         </div>
       </div>
@@ -35,7 +35,7 @@ import { CommonModule } from '@angular/common';
           <span class="text-xl md:text-2xl font-black font-outfit tracking-tighter text-lumina-olive uppercase">MasterOne</span>
         </div>
 
-        <div class="hidden lg:flex items-center gap-8 xl:gap-10">
+        <div class="hidden lg:flex items-center gap-8 xl:gap-10 h-full">
           <button 
             *ngFor="let nav of navItems"
             (click)="navigateTo(nav.id)" 
@@ -50,7 +50,17 @@ import { CommonModule } from '@angular/common';
           <button (click)="navigateTo('chat')" [ngClass]="activeTab === 'chat' ? 'bg-lumina-rust text-white shadow-lg' : 'bg-lumina-olive/5 text-lumina-olive'" class="p-2.5 rounded-xl transition-all shadow-sm">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
-          <button *ngIf="!isLoggedIn" (click)="onLoginRequest.emit()" class="hidden sm:block px-6 py-3 bg-lumina-olive text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-lumina-rust transition-all shadow-md active:scale-95">Login</button>
+          
+          <ng-container *ngIf="!isLoggedIn">
+            <button (click)="onLoginRequest.emit()" class="hidden sm:block px-6 py-3 bg-lumina-olive text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-lumina-rust transition-all shadow-md active:scale-95">Login</button>
+          </ng-container>
+          
+          <ng-container *ngIf="isLoggedIn">
+            <button (click)="logout.emit()" class="hidden sm:flex items-center gap-2 px-6 py-3 bg-lumina-rust text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-lumina-olive transition-all shadow-md active:scale-95">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </button>
+          </ng-container>
           
           <button (click)="toggleMobileMenu()" class="lg:hidden p-2.5 rounded-xl bg-lumina-olive/5 text-lumina-olive hover:bg-lumina-rust hover:text-white transition-all">
             <svg *ngIf="!isMenuOpen()" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
@@ -72,10 +82,21 @@ import { CommonModule } from '@angular/common';
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
+        
         <div class="flex flex-col gap-8 flex-1">
           <button *ngFor="let nav of navItems" (click)="navigateTo(nav.id)" class="text-left py-4 border-b border-white/5 flex items-center justify-between group">
             <span [ngClass]="activeTab === nav.id ? 'text-lumina-rust' : 'text-white'" class="text-2xl font-black font-outfit uppercase tracking-tighter group-hover:translate-x-2 transition-transform">{{ nav.label }}</span>
             <svg class="w-6 h-6 text-white/20 group-hover:text-lumina-rust transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="mt-auto py-10 border-t border-white/10">
+          <button *ngIf="!isLoggedIn" (click)="onLoginRequest.emit()" class="w-full py-6 bg-white text-lumina-dark rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl">
+            VIP Access
+          </button>
+          <button *ngIf="isLoggedIn" (click)="logout.emit(); isMenuOpen.set(false)" class="w-full py-6 bg-lumina-rust text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl flex items-center justify-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Deauthorize Session
           </button>
         </div>
       </div>

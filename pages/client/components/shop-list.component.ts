@@ -52,7 +52,7 @@ export interface ShopProfile {
         </div>
 
         <!-- Favorites Section (DYNAMIQUE) -->
-        <div *ngIf="isLoggedIn && favoriteShops().length > 0" class="mb-32 bg-lumina-dark reveal active animate-in fade-in slide-in-from-top-10 duration-1000">
+        <div *ngIf="isLoggedIn && favoriteShops().length > 0" class="mb-32  reveal active animate-in fade-in slide-in-from-top-10 duration-1000">
           <div class="flex items-center gap-6 mb-12">
             <div class="w-14 h-14 bg-lumina-rust rounded-[24px] flex items-center justify-center text-white shadow-3xl shadow-lumina-rust/20 rotate-3">
                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.505 4.04 3 5.5L12 21l7-7Z"/></svg>

@@ -12,41 +12,41 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          lumina: {
-            sage: '#B4B792',
-            olive: '#646E57',
-            rust: '#8C4A33',
-            mint: '#A4BAA8',
-            tan: '#CCAC85',
-            cream: '#FAFAF9',
-            dark: '#2D3325',
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            lumina: {
+              sage: '#B4B792',
+              olive: '#646E57',
+              rust: '#8C4A33',
+              mint: '#A4BAA8',
+              tan: '#CCAC85',
+              cream: '#FAFAF9',
+              dark: '#2D3325',
+            }
+          },
+          fontFamily: {
+            outfit: ['Outfit', 'sans-serif'],
+            jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          // Ajoutez cette section pour les tailles supplémentaires
+          width: {
+            '90': '22.5rem',    // 360px
+            '100': '25rem',      // 400px
+            '110': '27.5rem',    // 440px
+            '120': '30rem',      // 480px
+          },
+          minWidth: {
+            '90': '22.5rem',
+            '100': '25rem',
+            '110': '27.5rem',
+            '120': '30rem',
           }
-        },
-        fontFamily: {
-          outfit: ['Outfit', 'sans-serif'],
-          jakarta: ['Plus Jakarta Sans', 'sans-serif'],
-        },
-        // Ajoutez cette section pour les tailles supplémentaires
-        width: {
-          '90': '22.5rem',    // 360px
-          '100': '25rem',      // 400px
-          '110': '27.5rem',    // 440px
-          '120': '30rem',      // 480px
-        },
-        minWidth: {
-          '90': '22.5rem',
-          '100': '25rem',
-          '110': '27.5rem',
-          '120': '30rem',
         }
       }
     }
-  }
-</script>
+  </script>
 
   <style>
     :root {

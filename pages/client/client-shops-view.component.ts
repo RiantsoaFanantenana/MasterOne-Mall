@@ -29,15 +29,6 @@ import { ShopCarouselComponent } from './components/shop-carousel.component.ts';
 
         <!-- LIST VIEW CONTAINER -->
         <ng-container *ngIf="!selectedShop()">
-          
-          <!-- EXCLUSIVE FAVORITES SECTION (Dark Background) -->
-          <app-shop-carousel 
-            *ngIf="isLoggedIn && favorites().size > 0" 
-            [items]="favoriteShops()"
-            [isLoggedIn]="isLoggedIn"
-            title="Your Favorites"
-            subtitle="See your most liked boutiques"
-          ></app-shop-carousel>
 
           <!-- If logged in but no favorites -->
           <div *ngIf="isLoggedIn && favorites().size === 0" class="bg-gray-100 py-16 text-center">
