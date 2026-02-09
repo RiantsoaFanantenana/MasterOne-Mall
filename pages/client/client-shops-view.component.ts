@@ -18,6 +18,7 @@ import { ShopCarouselComponent } from './components/shop-carousel.component.ts';
         <app-shop-details
           *ngIf="selectedShop()"
           [shop]="selectedShop()!"
+          [shops]="allShops"
           [events]="getEventsForShop(selectedShop()?.user_id)"
           [discounts]="getDiscountsForShop(selectedShop()?.user_id)"
           [reviews]="getReviewsForShop(selectedShop()?.user_id)"

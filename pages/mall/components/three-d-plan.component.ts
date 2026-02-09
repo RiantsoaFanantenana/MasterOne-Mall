@@ -124,14 +124,14 @@ interface Floor {
               <svg 
                 class="absolute pointer-events-auto overflow-visible cursor-pointer"
                 style="width: 8000px; height: 8000px; left: 0; top: 0;"
-                [style.transform]="'translateZ(' + (selectedRoomId === room.name ? 15 : getRoomDepthZ(room)) + 'px)'">
+                [style.transform]="'translateZ(' + getRoomDepthZ(room) + 'px)'">
                 <polygon 
                   [attr.points]="getRoomPointsString(room.points)"
                   [attr.fill]="getRoomColor(room)"
-                  [attr.fill-opacity]="selectedRoomId === room.name ? 0.9 : (room.category === 'parking' ? 0.08 : 0.15)"
-                  [attr.stroke]="selectedRoomId === room.name ? '#8C4A33' : getRoomColor(room)"
-                  [attr.stroke-width]="selectedRoomId === room.name ? 3 : 1"
-                  [attr.stroke-opacity]="selectedRoomId === room.name ? 1 : 0.4"
+                  [attr.fill-opacity]="selectedShop && selectedShop.id_box === room.name ? 0.9 : (room.category === 'parking' ? 0.08 : 0.15)"
+                  [attr.stroke]="selectedShop && selectedShop.id_box === room.name ? '#8C4A33' : getRoomColor(room)"
+                  [attr.stroke-width]="selectedShop && selectedShop.id_box === room.name ? 3 : 1"
+                  [attr.stroke-opacity]="selectedShop && selectedShop.id_box === room.name ? 1 : 0.4"
                   [attr.stroke-dasharray]="room.category === 'parking' ? '4 4' : 'none'"
                   class="transition-all duration-500"
                 />
@@ -232,9 +232,9 @@ interface Floor {
                 [style.left.px]="mToPx(getRoomCenter(room).x)"
                 [style.top.px]="mToPx(getRoomCenter(room).y)"
                 [style.transform]="'translate(-50%, -50%) translateZ(65px)'"
-                [ngClass]="selectedRoomId === room.name ? 'bg-lumina-rust text-white scale-125 border-white shadow-lumina-rust/40' : 'bg-white text-lumina-olive scale-100 border-lumina-olive/10'">
+                [ngClass]="selectedShop && selectedShop.id_box === room.name ? 'bg-lumina-rust text-white scale-125 border-white shadow-lumina-rust/40' : 'bg-white text-lumina-olive scale-100 border-lumina-olive/10'">
                 <div class="flex flex-col items-center gap-1.5">
-                  <span class="text-[11px] font-black uppercase tracking-[0.3em] leading-none">{{ selectedShop && selectedShop.id_box === room.name ? selectedShop.shop_name : room.name }}</span>
+                  <span class="text-[11px] font-black uppercase tracking-[0.3em] leading-none">{{ getShopName(room) }}</span>
                   <div class="w-full h-[1px] bg-current opacity-10 my-0.5"></div>
                   <span *ngIf="room.category === 'parking'" class="text-[9px] font-bold uppercase opacity-60 tracking-wider">
                     {{ getTotalParkingSpots(room) }} LUX Slots
@@ -259,7 +259,7 @@ interface Floor {
 })
 export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
   @Input() floors: Floor[] = [];
-  @Input() selectedRoomId: string | null = null;
+  @Input() shops: [] | null = [];
   @Input() selectedShop: {} | null = null;
   @Input() selectedSpotId: string | null = null;
   @Input() initialFloorIndex: number = 0;
@@ -280,6 +280,11 @@ export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
       ? this.floors[idx] 
       : { id: 'def', name: 'Loading...', walls: [], rooms: [] } as Floor;
   });
+
+  getShopName(room: any): string {
+    const foundShop = this.shops.find(item => item.id_box === room.name);
+    return foundShop?.shop_name ?? room.name;
+  }
   
   currentFloorName = computed(() => this.currentFloor()?.name ?? '');
   bounds = computed(() => this.calculateBounds());
@@ -293,10 +298,6 @@ export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
     if (changes['initialFloorIndex'] && changes['initialFloorIndex'].currentValue !== undefined) {
       this.activeFloorIndex.set(changes['initialFloorIndex'].currentValue);
     }
-  }
-
-  onRoomClick(id: string) {
-    this.selectedRoomId = (this.selectedRoomId === id) ? null : id;
   }
 
   isSpotSelected(group: SpotGroup, idx: number): boolean {
@@ -360,7 +361,7 @@ export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
   getRoomPointsString(pts: Point[]): string { return (pts ?? []).map(p => `${this.mToPx(p.x)},${this.mToPx(p.y)}`).join(' '); }
 
   getRoomColor(r: Room): string {
-    if (r.id === this.selectedRoomId) return '#8C4A33';
+    if (r.name === this.selectedShop?.id_box) return '#8C4A33';
     if (r.category === 'parking') return '#646E57';
     const MAP: { [k: string]: string } = { 
       'service': '#B4B792', 

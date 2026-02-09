@@ -106,7 +106,7 @@ export interface ShopReview {
             <div class="rounded-[60px] overflow-hidden shadow-3xl border border-lumina-olive/10 bg-lumina-cream">
               <app-three-d-plan 
                 [floors]="data.mallFloors()"
-                [selectedRoomId]="shop.id_box"
+                [shops]="shops"
                 [selectedShop]="shop"
                 [initialFloorIndex]="shopFloorIndex()"
               ></app-three-d-plan>
@@ -134,6 +134,7 @@ export class ShopDetailsComponent implements AfterViewInit {
   data = inject(MasterDataService);
   @Input() shop!: ShopProfile;
   @Input() events: any[] = [];
+  @Input() shops: ShopProfile[] = [];
   @Input() discounts: any[] = [];
   @Input() reviews: ShopReview[] = [];
   @Input() isLoggedIn: boolean = false;
