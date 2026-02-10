@@ -18,9 +18,9 @@ import { FormsModule } from '@angular/forms';
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-end">
         <div class="space-y-3">
-          <label class="erp-label">Plan Identifier</label>
+          <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Plan Identifier</label>
           <div class="relative group">
-            <select [(ngModel)]="sub.name" class="erp-input appearance-none pr-14 cursor-pointer">
+            <select [(ngModel)]="sub.name" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20 appearance-none pr-14 cursor-pointer">
               <option value="" disabled>Select Tier...</option>
               <option *ngFor="let name of planNames" [value]="name">{{ name }}</option>
             </select>
@@ -30,20 +30,14 @@ import { FormsModule } from '@angular/forms';
           </div>
         </div>
         <div class="space-y-3">
-          <label class="erp-label">Monthly Rate (€)</label>
-          <input [(ngModel)]="sub.price" type="number" class="erp-input" />
+          <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Monthly Rate (€)</label>
+          <input [(ngModel)]="sub.price" type="number" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20" />
         </div>
-        <button (click)="submit()" class="erp-button h-[70px]">
+        <button (click)="submit()" class="w-full px-8 py-4 bg-lumina-olive text-white rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] font-outfit shadow-2xl hover:bg-lumina-rust transition-all active:scale-95 h-[70px]">
           Deploy Protocol
         </button>
       </div>
     </div>
-
-    <style>
-      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta; }
-      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20; }
-      .erp-button { @apply w-full px-8 py-4 bg-lumina-olive text-white rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] font-outfit shadow-2xl hover:bg-lumina-rust transition-all active:scale-95; }
-    </style>
   `
 })
 export class SubscriptionRegistrationComponent {

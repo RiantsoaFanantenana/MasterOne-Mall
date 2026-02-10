@@ -26,6 +26,10 @@ export class MasterDataService {
     { id: 3, name: 'Elite Partner', price: 9000, features: ['Bespoke Events', 'Concierge 24/7', 'Full Digital Dominance'] }
   ]);
 
+  // Parking State
+  clientParkingSpot = signal<string | null>(null);
+  occupiedSpots = signal<Set<string>>(new Set(['PA02', 'PA05', 'PB01', 'PB10', 'PC03', 'PC08']));
+
   // Centralized Architectural Data
   mallFloors = signal<any[]>([
   {

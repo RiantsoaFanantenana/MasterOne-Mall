@@ -1,4 +1,3 @@
-
 import { Component, Input, signal, computed, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +51,7 @@ interface Floor {
   template: `
     <div 
       class="relative w-full h-[750px] bg-lumina-cream overflow-hidden flex items-center justify-center select-none cursor-grab active:cursor-grabbing border border-lumina-olive/10 rounded-[60px] shadow-2xl"
+      #container
       (mousedown)="onMouseDown($event)"
       (mousemove)="onMouseMove($event)"
       (mouseup)="onMouseUp()"
@@ -73,7 +73,7 @@ interface Floor {
       <div class="absolute top-10 left-10 z-50 flex flex-col gap-3">
         <div class="bg-white/80 backdrop-blur-2xl p-2 rounded-[32px] border border-lumina-olive/5 shadow-2xl flex flex-col gap-2">
           <button *ngFor="let floor of floors; let i = index"
-                  (click)="activeFloorIndex.set(i)"
+                  (click)="activeFloorIndex.set(i); centerView()"
                   [ngClass]="activeFloorIndex() === i ? 'bg-lumina-olive text-white shadow-lg shadow-lumina-olive/20' : 'text-lumina-olive/40 hover:text-lumina-olive hover:bg-white'"
                   class="px-6 py-4 rounded-[24px] font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-4">
             <span class="w-1.5 h-1.5 rounded-full" [ngClass]="activeFloorIndex() === i ? 'bg-lumina-mint animate-pulse' : 'bg-current opacity-20'"></span>
@@ -88,6 +88,15 @@ interface Floor {
           <button (click)="zoomIn()" class="w-14 h-14 flex items-center justify-center text-xl font-bold text-lumina-olive hover:bg-white rounded-[24px] transition-all">+</button>
           <div class="h-[1px] bg-lumina-olive/5 mx-3"></div>
           <button (click)="zoomOut()" class="w-14 h-14 flex items-center justify-center text-xl font-bold text-lumina-olive hover:bg-white rounded-[24px] transition-all">−</button>
+        </div>
+        
+        <!-- BOUTON CENTRER LA VUE -->
+        <div class="bg-white/80 backdrop-blur-2xl p-2 rounded-[32px] border border-lumina-olive/5 shadow-2xl flex flex-col gap-1">
+          <button (click)="centerView()" class="w-14 h-14 flex items-center justify-center text-xs font-bold text-lumina-olive hover:bg-white rounded-[24px] transition-all" title="Centrer la vue">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm-9 7a9 9 0 1118 0 9 9 0 01-18 0zm9-5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -191,246 +200,4 @@ interface Floor {
                 [style.top.px]="mToPx(section.startY) - BRICK_HEIGHT / 2"
                 [style.transform-origin]="'0% 50%'"
                 [style.transform]="getWallTransform(wall, section)"
-                style="transform-style: preserve-3d; border: 1px solid rgba(45,51,37,0.1);">
-                
-                <!-- TOP CAP -->
-                <div class="absolute bg-lumina-olive shadow-[inset_0_0_10px_rgba(0,0,0,0.2)]"
-                     [style.width]="'100%'"
-                     [style.height.px]="mToPx(wall.thickness)"
-                     [style.top.px]="-mToPx(wall.thickness / 2)"
-                     style="transform: rotateX(90deg); transform-origin: top;">
-                </div>
-              </div>
-            </ng-container>
-
-            <!-- DOORS -->
-            <ng-container *ngFor="let door of (wall.doors ?? [])">
-              <div 
-                class="absolute pointer-events-none flex flex-col items-center justify-center"
-                [style.left.px]="mToPx(getDoorPosition(wall, door).x)"
-                [style.top.px]="mToPx(getDoorPosition(wall, door).y)"
-                [style.transform]="getDoorTransform(wall, door)">
-                
-                <div class="w-8 h-8 text-lumina-rust bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-xl border border-lumina-rust/20 animate-pulse-gentle">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path [attr.d]="door.isOutward ? 'M12 20l8-8H4z' : 'M12 4l-8 8h16z'" fill="currentColor" />
-                  </svg>
-                </div>
-              </div>
-            </ng-container>
-          </ng-container>
-        </ng-container>
-
-        <!-- ROOMS -->
-        <ng-container *ngIf="currentFloor()?.rooms">
-          <ng-container *ngFor="let room of currentFloor().rooms">
-            <div [attr.key]="room.id" [style.transform-style]="'preserve-3d'">
-
-              <!-- LUXURY LABELS (RESIZED FOR VISIBILITY) -->
-              <div 
-                class="absolute whitespace-nowrap px-6 py-3 rounded-[24px] backdrop-blur-xl border-2 transition-all duration-500 z-50 shadow-2xl"
-                [style.left.px]="mToPx(getRoomCenter(room).x)"
-                [style.top.px]="mToPx(getRoomCenter(room).y)"
-                [style.transform]="'translate(-50%, -50%) translateZ(65px)'"
-                [ngClass]="selectedShop && selectedShop.id_box === room.name ? 'bg-lumina-rust text-white scale-125 border-white shadow-lumina-rust/40' : 'bg-white text-lumina-olive scale-100 border-lumina-olive/10'">
-                <div class="flex flex-col items-center gap-1.5">
-                  <span class="text-[11px] font-black uppercase tracking-[0.3em] leading-none">{{ getShopName(room) }}</span>
-                  <div class="w-full h-[1px] bg-current opacity-10 my-0.5"></div>
-                  <span *ngIf="room.category === 'parking'" class="text-[9px] font-bold uppercase opacity-60 tracking-wider">
-                    {{ getTotalParkingSpots(room) }} LUX Slots
-                  </span>
-                  <span *ngIf="room.category === 'shop'" class="text-[9px] font-black uppercase opacity-60 tracking-tighter">
-                    Maison d'Excellence
-                  </span>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-        </ng-container>
-        
-      </div>
-    </div>
-  `,
-  styles: [`
-    :host { display: block; }
-    @keyframes pulse-gentle { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
-    .animate-pulse-gentle { animation: pulse-gentle 3s ease-in-out infinite; }
-  `]
-})
-export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
-  @Input() floors: Floor[] = [];
-  @Input() shops: [] | null = [];
-  @Input() selectedShop: {} | null = null;
-  @Input() selectedSpotId: string | null = null;
-  @Input() initialFloorIndex: number = 0;
-  
-  readonly MALL_RATIO = 35;
-  readonly BRICK_HEIGHT = 16;
-  
-  activeFloorIndex = signal(0);
-  zoom = signal(1);
-  pan = signal({ x: 0, y: 0 });
-  perspectiveOrigin = signal({ x: 0.5, y: 0.5 });
-  isPanning = false;
-  lastMouse = { x: 0, y: 0 };
-
-  currentFloor = computed(() => {
-    const idx = this.activeFloorIndex();
-    return (this.floors && this.floors.length > 0 && idx >= 0 && idx < this.floors.length)
-      ? this.floors[idx] 
-      : { id: 'def', name: 'Loading...', walls: [], rooms: [] } as Floor;
-  });
-
-  getShopName(room: any): string {
-    const foundShop = this.shops.find(item => item.id_box === room.name);
-    return foundShop?.shop_name ?? room.name;
-  }
-  
-  currentFloorName = computed(() => this.currentFloor()?.name ?? '');
-  bounds = computed(() => this.calculateBounds());
-  center = computed(() => this.calculateCenter());
-
-  ngAfterViewInit() {
-    this.activeFloorIndex.set(this.initialFloorIndex);
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['initialFloorIndex'] && changes['initialFloorIndex'].currentValue !== undefined) {
-      this.activeFloorIndex.set(changes['initialFloorIndex'].currentValue);
-    }
-  }
-
-  isSpotSelected(group: SpotGroup, idx: number): boolean {
-    if (!this.selectedSpotId) return false;
-    return this.getSpotNumber(group, idx) === this.selectedSpotId;
-  }
-
-  zoomIn() { this.zoom.update(z => Math.min(5, z * 1.2)); }
-  zoomOut() { this.zoom.update(z => Math.max(0.1, z / 1.2)); }
-  
-  getPerspective(): string { return (2000 / this.zoom()) + 'px'; }
-  getPerspectiveOrigin(): string { const o = this.perspectiveOrigin(); return `${o.x * 100}% ${o.y * 100}%`; }
-  getGridBackground() { return 'linear-gradient(to right, rgba(100,110,87,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(100,110,87,0.05) 1px, transparent 1px)'; }
-
-  calculateBounds() {
-    const f = this.currentFloor();
-    let minX = 0, maxX = 100, minY = 0, maxY = 100;
-    if (f?.walls?.length || f?.rooms?.length) {
-      minX = Infinity; maxX = -Infinity; minY = Infinity; maxY = -Infinity;
-      (f.walls ?? []).forEach(w => {
-        minX = Math.min(minX, w.p1.x, w.p2.x); maxX = Math.max(maxX, w.p1.x, w.p2.x);
-        minY = Math.min(minY, w.p1.y, w.p2.y); maxY = Math.max(maxY, w.p1.y, w.p2.y);
-      });
-      (f.rooms ?? []).forEach(r => {
-        (r.points ?? []).forEach(p => {
-          minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
-          minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
-        });
-      });
-    }
-    return (!isFinite(minX)) ? { minX: 0, maxX: 100, minY: 0, maxY: 100 } : { minX, maxX, minY, maxY };
-  }
-
-  calculateCenter() {
-    const b = this.bounds();
-    return { x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 };
-  }
-
-  calculateZDepth(x: number, y: number): number {
-    const c = this.center();
-    const dist = Math.sqrt(Math.pow(x - c.x, 2) + Math.pow(y - c.y, 2));
-    return -dist * 0.1;
-  }
-
-  mToPx(m: number): number { return m * this.MALL_RATIO; }
-  getTransform() {
-    const c = this.center();
-    return `scale(${this.zoom()}) rotateX(60deg) translate3d(${-this.mToPx(c.x) + this.pan().x}px, ${-this.mToPx(c.y) + this.pan().y}px, 0px)`;
-  }
-
-  getRoomCenter(r: Room): Point {
-    const pts = r.points ?? [];
-    if (!pts.length) return { x: 0, y: 0 };
-    return { x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length };
-  }
-
-  getRoomDepthZ(r: Room): number { const c = this.getRoomCenter(r); return this.calculateZDepth(c.x, c.y); }
-  getGroupDepthZ(x: number, y: number): number { return this.calculateZDepth(x, y); }
-  getWallDepthZ(w: Wall): number { return this.calculateZDepth((w.p1.x + w.p2.x) / 2, (w.p1.y + w.p2.y) / 2); }
-  getDoorDepthZ(w: Wall, d: Door): number { return this.calculateZDepth(w.p1.x + (w.p2.x - w.p1.x) * d.position, w.p1.y + (w.p2.y - w.p1.y) * d.position); }
-  getRoomPointsString(pts: Point[]): string { return (pts ?? []).map(p => `${this.mToPx(p.x)},${this.mToPx(p.y)}`).join(' '); }
-
-  getRoomColor(r: Room): string {
-    if (r.name === this.selectedShop?.id_box) return '#8C4A33';
-    if (r.category === 'parking') return '#646E57';
-    const MAP: { [k: string]: string } = { 
-      'service': '#B4B792', 
-      'shop': '#CCAC85', 
-      'green': '#A4BAA8', 
-      'food': '#8C4A33' 
-    };
-    return MAP[r.category] ?? '#646E57';
-  }
-
-  getFontSize(w: number): number { return Math.max(6, Math.min(10, this.mToPx(w) * 0.25)); }
-  getSpotNumber(g: SpotGroup, idx: number): string {
-    const row = Math.floor(idx / g.countPerSide);
-    const col = idx % g.countPerSide;
-    const num = g.startIndex + (row === 0 ? col : (g.countPerSide * 2 - 1 - col));
-    return `${g.prefix}${num.toString().padStart(2, '0')}`;
-  }
-
-  getTotalParkingSpots(r: Room): number { return (r.spotGroups ?? []).reduce((t, g) => t + (g.countPerSide * 2), 0); }
-  getArray(l: number): any[] { return Array.from({ length: Math.max(0, l) }); }
-
-  getWallSections(w: Wall): any[] {
-    const len = Math.sqrt(Math.pow(w.p2.x - w.p1.x, 2) + Math.pow(w.p2.y - w.p1.y, 2));
-    const doors = [...(w.doors ?? [])].sort((a, b) => a.position - b.position);
-    let curr = 0; const secs: any[] = [];
-    doors.forEach(d => {
-      const start = d.position - (d.width / 2 / len);
-      if (start > curr) secs.push({ startX: w.p1.x + (w.p2.x - w.p1.x) * curr, startY: w.p1.y + (w.p2.y - w.p1.y) * curr, length: (start - curr) * len });
-      curr = d.position + (d.width / 2 / len);
-    });
-    if (curr < 1) secs.push({ startX: w.p1.x + (w.p2.x - w.p1.x) * curr, startY: w.p1.y + (w.p2.y - w.p1.y) * curr, length: (1 - curr) * len });
-    return secs;
-  }
-
-  getWallTransform(w: Wall, s: any): string {
-    const ang = Math.atan2(w.p2.y - w.p1.y, w.p2.x - w.p1.x) * 180 / Math.PI;
-    const z = this.getWallDepthZ(w);
-    return `rotateZ(${ang}deg) rotateX(-90deg) translateZ(${z}px)`;
-  }
-
-  getDoorPosition(w: Wall, d: Door): Point { return { x: w.p1.x + (w.p2.x - w.p1.x) * d.position, y: w.p1.y + (w.p2.y - w.p1.y) * d.position }; }
-  getDoorTransform(w: Wall, d: Door): string {
-    const ang = Math.atan2(w.p2.y - w.p1.y, w.p2.x - w.p1.x) * 180 / Math.PI;
-    const z = this.getDoorDepthZ(w, d);
-    return `translate(-50%, -50%) rotateZ(${ang}deg) translateZ(${z + 5}px)`;
-  }
-
-  onMouseDown(e: MouseEvent) { this.isPanning = true; this.lastMouse = { x: e.clientX, y: e.clientY }; }
-  onMouseMove(e: MouseEvent) {
-    if (!this.isPanning) return;
-    const dx = e.clientX - this.lastMouse.x;
-    const dy = e.clientY - this.lastMouse.y;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    this.perspectiveOrigin.set({ 
-      x: Math.max(0.3, Math.min(0.7, 0.5 - (dx / rect.width) * 0.01)), 
-      y: Math.max(0.3, Math.min(0.7, 0.5 - (dy / rect.height) * 0.01)) 
-    });
-    this.pan.update(p => ({ x: p.x + dx / this.zoom(), y: p.y + dy / this.zoom() }));
-    this.lastMouse = { x: e.clientX, y: e.clientY };
-  }
-  onMouseUp() { this.isPanning = false; }
-  onWheel(e: WheelEvent) {
-    e.preventDefault();
-    const f = e.deltaY < 0 ? 1.1 : 0.9;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    this.perspectiveOrigin.set({ 
-      x: Math.max(0.3, Math.min(0.7, (e.clientX - rect.left) / rect.width)), 
-      y: Math.max(0.3, Math.min(0.7, (e.clientY - rect.top) / rect.height)) 
-    });
-    this.zoom.update(z => Math.max(0.1, Math.min(5, z * f)));
-  }
-}
+                style="transform-style: preserve-3d; border: 1px solid rgba(45,51,3

@@ -58,14 +58,14 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             <h4 class="text-[12px] font-black uppercase tracking-[0.6em] text-lumina-tan border-b border-lumina-olive/5 pb-8">Core Identity</h4>
             
             <div class="space-y-3">
-              <label class="erp-label">Maison Nomenclature</label>
-              <input [(ngModel)]="form.shop_name" placeholder="Elysian Garments" class="erp-input" />
+              <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Maison Nomenclature</label>
+              <input [(ngModel)]="form.shop_name" placeholder="Elysian Garments" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20" />
             </div>
 
             <div class="space-y-3">
-              <label class="erp-label">Market Segment</label>
+              <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Market Segment</label>
               <div class="relative group">
-                <select [(ngModel)]="form.id_type" class="erp-input appearance-none pr-14 cursor-pointer">
+                <select [(ngModel)]="form.id_type" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 appearance-none pr-14 cursor-pointer">
                   <option *ngFor="let t of data.shopTypes()" [value]="t.id">{{ t.type_name }}</option>
                 </select>
                 <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
@@ -75,8 +75,8 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             </div>
 
             <div class="space-y-3">
-              <label class="erp-label">Narrative Heritage</label>
-              <textarea [(ngModel)]="form.description" rows="5" placeholder="Tell the story of the brand..." class="erp-input resize-none py-6 leading-relaxed"></textarea>
+              <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Narrative Heritage</label>
+              <textarea [(ngModel)]="form.description" rows="5" placeholder="Tell the story of the brand..." class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 resize-none py-6 leading-relaxed"></textarea>
             </div>
           </div>
 
@@ -84,9 +84,9 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             <h4 class="text-[12px] font-black uppercase tracking-[0.6em] text-lumina-tan border-b border-lumina-olive/5 pb-8">Commercial Terms</h4>
             
             <div class="space-y-3">
-              <label class="erp-label">Assigned Atrium Location</label>
+              <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Assigned Atrium Location</label>
               <div class="relative group">
-                <select [(ngModel)]="form.id_box" class="erp-input appearance-none pr-14 cursor-pointer">
+                <select [(ngModel)]="form.id_box" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 appearance-none pr-14 cursor-pointer">
                   <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
                 </select>
                 <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
@@ -97,18 +97,18 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
 
             <div class="grid grid-cols-2 gap-10">
               <div class="space-y-3">
-                <label class="erp-label">Commencement</label>
-                <input type="date" [(ngModel)]="form.start_date" class="erp-input" />
+                <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Commencement</label>
+                <input type="date" [(ngModel)]="form.start_date" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20" />
               </div>
               <div class="space-y-3">
-                <label class="erp-label">Termination</label>
-                <input type="date" [(ngModel)]="form.end_date" class="erp-input" />
+                <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Termination</label>
+                <input type="date" [(ngModel)]="form.end_date" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20" />
               </div>
             </div>
 
             <div class="space-y-3">
-              <label class="erp-label">Agreed Monthly Rent (€)</label>
-              <input type="number" [(ngModel)]="form.rent" class="erp-input bg-white/50" />
+              <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Agreed Monthly Rent (€)</label>
+              <input type="number" [(ngModel)]="form.rent" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 bg-white/50" />
             </div>
           </div>
         </div>
@@ -125,11 +125,6 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
         </div>
       </div>
     </div>
-
-    <style>
-      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta; }
-      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20; }
-    </style>
   `
 })
 export class ContractsViewComponent {
@@ -154,18 +149,8 @@ export class ContractsViewComponent {
     exceptions: [] as OpeningHourException[]
   };
 
-  getSelectedSubPrice() {
-    const sub = this.data.subscriptionTypes().find(s => s.id == this.selectedSubId);
-    return sub ? sub.price : 0;
-  }
-
-  onSubChange() {
-    this.form.rent = this.getSelectedSubPrice();
-  }
-
   createMerchant() {
     if(!this.form.shop_name) return;
-    const selectedSub = this.data.subscriptionTypes().find(s => s.id == this.selectedSubId);
     const newMerchant: ShopProfile = {
       user_id: Date.now(),
       id_type: Number(this.form.id_type),
@@ -174,7 +159,7 @@ export class ContractsViewComponent {
       logo: `https://api.dicebear.com/7.x/initials/svg?seed=${this.form.shop_name}`,
       cover_pic: '',
       description: this.form.description,
-      subscription_status: (selectedSub?.name.toLowerCase().includes('premium') || selectedSub?.name.toLowerCase().includes('elite') ? 'premium' : 'standard') as any,
+      subscription_status: 'standard',
       opening_hours: [...this.form.opening_hours],
       exceptions: [...this.form.exceptions]
     };

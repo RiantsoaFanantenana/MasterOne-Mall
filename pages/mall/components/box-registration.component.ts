@@ -18,28 +18,22 @@ import { FormsModule } from '@angular/forms';
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-10 items-end">
         <div class="space-y-3">
-          <label class="erp-label">Box Reference</label>
-          <input [(ngModel)]="box.box_number" placeholder="e.g. A-105" class="erp-input" />
+          <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Box Reference</label>
+          <input [(ngModel)]="box.box_number" placeholder="e.g. A-105" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20" />
         </div>
         <div class="space-y-3">
-          <label class="erp-label">Floor Level</label>
-          <input [(ngModel)]="box.floor" type="number" class="erp-input" />
+          <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Floor Level</label>
+          <input [(ngModel)]="box.floor" type="number" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20" />
         </div>
         <div class="space-y-3">
-          <label class="erp-label">Surface (m²)</label>
-          <input [(ngModel)]="box.surface_area" type="number" class="erp-input" />
+          <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Surface (m²)</label>
+          <input [(ngModel)]="box.surface_area" type="number" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20" />
         </div>
-        <button (click)="submit()" class="erp-button h-[70px]">
+        <button (click)="submit()" class="w-full px-8 py-4 bg-lumina-olive text-white rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] font-outfit shadow-2xl hover:bg-lumina-rust transition-all active:scale-95 flex items-center justify-center gap-2 h-[70px]">
           Archive Asset
         </button>
       </div>
     </div>
-
-    <style>
-      .erp-label { @apply text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta; }
-      .erp-input { @apply w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20; }
-      .erp-button { @apply w-full px-8 py-4 bg-lumina-olive text-white rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] font-outfit shadow-2xl hover:bg-lumina-rust transition-all active:scale-95 flex items-center justify-center gap-2; }
-    </style>
   `
 })
 export class BoxRegistrationComponent {
