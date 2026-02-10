@@ -65,7 +65,7 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             <div class="space-y-3">
               <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Market Segment</label>
               <div class="relative group">
-                <select [(ngModel)]="form.id_type" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 appearance-none pr-14 cursor-pointer">
+                <select [(ngModel)]="form.id_type" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg appearance-none pr-14 cursor-pointer">
                   <option *ngFor="let t of data.shopTypes()" [value]="t.id">{{ t.type_name }}</option>
                 </select>
                 <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
@@ -76,7 +76,7 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
 
             <div class="space-y-3">
               <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Narrative Heritage</label>
-              <textarea [(ngModel)]="form.description" rows="5" placeholder="Tell the story of the brand..." class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 resize-none py-6 leading-relaxed"></textarea>
+              <textarea [(ngModel)]="form.description" rows="5" placeholder="Tell the story of the brand..." class="w-full px-8 py-6 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 resize-none leading-relaxed"></textarea>
             </div>
           </div>
 
@@ -86,7 +86,7 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             <div class="space-y-3">
               <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Assigned Atrium Location</label>
               <div class="relative group">
-                <select [(ngModel)]="form.id_box" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 appearance-none pr-14 cursor-pointer">
+                <select [(ngModel)]="form.id_box" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg appearance-none pr-14 cursor-pointer">
                   <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
                 </select>
                 <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
@@ -98,17 +98,17 @@ import { MerchantRowComponent } from './components/merchant-row.component.ts';
             <div class="grid grid-cols-2 gap-10">
               <div class="space-y-3">
                 <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Commencement</label>
-                <input type="date" [(ngModel)]="form.start_date" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20" />
+                <input type="date" [(ngModel)]="form.start_date" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all" />
               </div>
               <div class="space-y-3">
                 <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Termination</label>
-                <input type="date" [(ngModel)]="form.end_date" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20" />
+                <input type="date" [(ngModel)]="form.end_date" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all" />
               </div>
             </div>
 
             <div class="space-y-3">
               <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Agreed Monthly Rent (€)</label>
-              <input type="number" [(ngModel)]="form.rent" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg placeholder:text-lumina-olive/20 bg-white/50" />
+              <input type="number" [(ngModel)]="form.rent" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all" />
             </div>
           </div>
         </div>

@@ -20,7 +20,7 @@ import { FormsModule } from '@angular/forms';
         <div class="space-y-3">
           <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Plan Identifier</label>
           <div class="relative group">
-            <select [(ngModel)]="sub.name" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20 appearance-none pr-14 cursor-pointer">
+            <select [(ngModel)]="sub.name" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all appearance-none cursor-pointer">
               <option value="" disabled>Select Tier...</option>
               <option *ngFor="let name of planNames" [value]="name">{{ name }}</option>
             </select>
@@ -31,7 +31,7 @@ import { FormsModule } from '@angular/forms';
         </div>
         <div class="space-y-3">
           <label class="text-[11px] font-black uppercase tracking-[0.2em] text-lumina-olive/60 ml-1 block font-jakarta">Monthly Rate (€)</label>
-          <input [(ngModel)]="sub.price" type="number" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive text-lg shadow-inner shadow-black/5 outline-none focus:border-lumina-rust transition-all placeholder:text-lumina-olive/20" />
+          <input [(ngModel)]="sub.price" type="number" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust transition-all" />
         </div>
         <button (click)="submit()" class="w-full px-8 py-4 bg-lumina-olive text-white rounded-3xl font-black uppercase text-[12px] tracking-[0.2em] font-outfit shadow-2xl hover:bg-lumina-rust transition-all active:scale-95 h-[70px]">
           Deploy Protocol

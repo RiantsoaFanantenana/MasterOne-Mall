@@ -103,7 +103,7 @@ import { ThreeDPlanComponent } from './components/three-d-plan.component.ts';
     </div>
   `,
   styles: [`
-    :host { @apply block; }
+    :host { display: block; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
   `]
 })
