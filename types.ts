@@ -39,36 +39,63 @@ export interface ShopProfile {
   exceptions?: OpeningHourException[];
 }
 
-export interface Contract {
+export interface MallEvent {
   id: number;
   shop_id: number;
-  box_id: string;
+  title: string;
+  description: string;
   start_date: string;
   end_date: string;
-  monthly_rent: number;
-  status: 'active' | 'expiring' | 'closed';
+  is_public: boolean;
+  created_at: string;
+  status: 'draft' | 'published' | 'archived' | 'cancelled';
 }
 
+export interface Discount {
+  id: number;
+  shop_id: number;
+  title: string;
+  description: string;
+  value: string;
+  start_date: string;
+  end_date: string;
+  status: 'active' | 'expired' | 'scheduled';
+  created_at: string;
+}
+
+export interface Coupon {
+  id: string;
+  create_at: string;
+  start_date: string;
+  end_date: string;
+  used_date: string | null;
+  description: string;
+}
+
+export interface BoxTicket {
+  id: number;
+  shop_id: number;
+  create_at: string;
+  description: string;
+  validation_date: string | null;
+  rejection_date: string | null;
+}
+
+export interface Subscription {
+  id: number;
+  shop_id: number;
+  type_id: number;
+  start_date: string;
+  end_date: string;
+  ruptured_date: string | null;
+}
+
+// Added SubscriptionType interface to fix compilation errors
 export interface SubscriptionType {
   id: number;
   name: string;
   price: number;
   features: string[];
-}
-
-export interface RentHistory {
-  id: number;
-  box_number: string;
-  amount: number;
-  date: string;
-  paid: boolean;
-}
-
-export interface BoxingRequest {
-  id: number;
-  shop_mail: string;
-  description: string;
-  create_at: string;
 }
 
 export interface OpeningHour {
@@ -83,4 +110,15 @@ export interface OpeningHourException {
   date: string;
   start_time: string;
   end_time: string;
+}
+
+export interface ChatConversation {
+  id: number;
+  client_name: string;
+  client_id: string;
+  shop_id: number;
+  last_message: string;
+  timestamp: number;
+  unread: boolean;
+  messages: { role: 'user' | 'shop', content: string, timestamp: number }[];
 }

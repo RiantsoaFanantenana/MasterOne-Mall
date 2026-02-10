@@ -1,6 +1,6 @@
 
-import { Injectable, signal } from '@angular/core';
-import { Box, ShopType, SubscriptionType } from '../types.ts';
+import { Injectable, signal, computed } from '@angular/core';
+import { Box, ShopType, SubscriptionType, ShopProfile, MallEvent, Discount, Coupon, BoxTicket, Subscription, ChatConversation } from '../types.ts';
 
 @Injectable({
   providedIn: 'root'
@@ -26,11 +26,53 @@ export class MasterDataService {
     { id: 3, name: 'Elite Partner', price: 9000, features: ['Bespoke Events', 'Concierge 24/7', 'Full Digital Dominance'] }
   ]);
 
+  // Active Shop Mock (Elysian Garments = ID 10)
+  activeShopId = signal(10);
+
+  shopProfiles = signal<ShopProfile[]>([
+    { user_id: 10, id_type: 1, id_box: 'A-101', shop_name: 'Elysian Garments', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', cover_pic: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200', description: 'The pinnacle of French luxury fashion. Every stitch tells a story of heritage and innovation.', subscription_status: 'premium' }
+  ]);
+
+  events = signal<MallEvent[]>([
+    { id: 1, shop_id: 10, title: 'Winter Gala', description: 'Exclusive winter collection launch.', start_date: '2024-12-01', end_date: '2024-12-02', is_public: true, created_at: new Date().toISOString(), status: 'published' }
+  ]);
+
+  discounts = signal<Discount[]>([
+    { id: 1, shop_id: 10, title: 'Grand Opening', description: 'Celebrating our new atrium location.', value: '20%', start_date: '2024-11-01', end_date: '2024-11-30', status: 'active', created_at: new Date().toISOString() }
+  ]);
+
+  coupons = signal<Coupon[]>([
+    { id: 'CP-1024', create_at: new Date().toISOString(), start_date: '2024-11-01', end_date: '2024-12-31', used_date: null, description: 'VIP Welcome Gift' }
+  ]);
+
+  boxTickets = signal<BoxTicket[]>([
+    { id: 5001, shop_id: 10, create_at: new Date().toISOString(), description: 'A/C unit leak in storage room', validation_date: null, rejection_date: null }
+  ]);
+
+  subscriptions = signal<Subscription[]>([
+    { id: 1, shop_id: 10, type_id: 2, start_date: '2024-01-01', end_date: '2024-12-31', ruptured_date: null }
+  ]);
+
+  conversations = signal<ChatConversation[]>([
+    { 
+      id: 1, 
+      client_name: 'Julian R.', 
+      client_id: 'client_001', 
+      shop_id: 10, 
+      last_message: 'Is the new velvet coat available in M?', 
+      timestamp: Date.now(), 
+      unread: true, 
+      messages: [
+        { role: 'user', content: 'Hello, I saw your post about the Winter Gala.', timestamp: Date.now() - 100000 },
+        { role: 'user', content: 'Is the new velvet coat available in size M?', timestamp: Date.now() - 50000 }
+      ]
+    }
+  ]);
+
   // Parking State
   clientParkingSpot = signal<string | null>(null);
   occupiedSpots = signal<Set<string>>(new Set(['PA02', 'PA05', 'PB01', 'PB10', 'PC03', 'PC08']));
 
-  // Centralized Architectural Data
   mallFloors = signal<any[]>([
   {
     "id": "f0",
@@ -4289,27 +4331,62 @@ export class MasterDataService {
   }
 ]);
 
-  addBox(box: Partial<Box>) {
-    this.boxes.update(v => [...v, { ...box, id: Date.now(), status: 'available' } as Box]);
+  // CRUD Operations
+  addEvent(event: Partial<MallEvent>) {
+    this.events.update(v => [{ ...event, id: Date.now(), shop_id: this.activeShopId(), created_at: new Date().toISOString() } as MallEvent, ...v]);
+  }
+  deleteEvent(id: number) { this.events.update(v => v.filter(e => e.id !== id)); }
+
+  addDiscount(discount: Partial<Discount>) {
+    this.discounts.update(v => [{ ...discount, id: Date.now(), shop_id: this.activeShopId(), created_at: new Date().toISOString() } as Discount, ...v]);
+  }
+  deleteDiscount(id: number) { this.discounts.update(v => v.filter(d => d.id !== id)); }
+
+  addCoupon(coupon: Partial<Coupon>) {
+    const newCoupon = { 
+      id: 'CP-' + Math.floor(Math.random() * 10000), 
+      create_at: new Date().toISOString(), 
+      used_date: null, 
+      ...coupon 
+    } as Coupon;
+    this.coupons.update(v => [newCoupon, ...v]);
+  }
+  deleteCoupon(id: string) { this.coupons.update(v => v.filter(c => c.id !== id)); }
+  useCoupon(id: string) { this.coupons.update(v => v.map(c => c.id === id ? { ...c, used_date: new Date().toISOString() } : c)); }
+
+  updateProfile(profile: ShopProfile) {
+    this.shopProfiles.update(v => v.map(p => p.user_id === profile.user_id ? profile : p));
   }
 
-  deleteBox(id: number) {
-    this.boxes.update(v => v.filter(b => b.id !== id));
+  addTicket(desc: string) {
+    this.boxTickets.update(v => [{ id: Date.now(), shop_id: this.activeShopId(), create_at: new Date().toISOString(), description: desc, validation_date: null, rejection_date: null }, ...v]);
   }
 
-  addShopType(name: string) {
-    this.shopTypes.update(v => [...v, { id: Date.now(), type_name: name }]);
+  sendChatResponse(convId: number, content: string) {
+    this.conversations.update(v => v.map(c => c.id === convId ? {
+      ...c,
+      unread: false,
+      last_message: content,
+      timestamp: Date.now(),
+      messages: [...c.messages, { role: 'shop', content, timestamp: Date.now() }]
+    } : c));
   }
 
-  deleteShopType(id: number) {
-    this.shopTypes.update(v => v.filter(t => t.id !== id));
-  }
-
-  addSubscriptionType(sub: Partial<SubscriptionType>) {
-    this.subscriptionTypes.update(v => [...v, { ...sub, id: Date.now(), features: ['MasterOne Essential Support'] } as SubscriptionType]);
-  }
-
-  deleteSubscriptionType(id: number) {
-    this.subscriptionTypes.update(v => v.filter(s => s.id !== id));
+  startConversation(shopId: number, clientName: string, clientId: string) {
+    const existing = this.conversations().find(c => c.shop_id === shopId && c.client_id === clientId);
+    if (existing) return existing.id;
+    
+    const newId = Date.now();
+    this.conversations.update(v => [...v, {
+      id: newId,
+      client_name: clientName,
+      client_id: clientId,
+      shop_id: shopId,
+      last_message: '',
+      timestamp: Date.now(),
+      unread: false,
+      messages: []
+    }]);
+    return newId;
   }
 }

@@ -96,8 +96,10 @@ import { ChatComponent } from './components/chat.component.ts';
             </div>
           </div>
 
-          <!-- Router Simulator -->
+          <!-- Content Switcher -->
           <div [ngClass]="isClientMode() ? 'w-full' : 'max-w-[1920px] mx-auto w-full p-6 md:p-12 lg:p-16'">
+            
+            <!-- ADMIN VIEW -->
             <app-mall-view 
               *ngIf="isAdminTab()"
               [activeModule]="activeTab()"
@@ -108,14 +110,21 @@ import { ChatComponent } from './components/chat.component.ts';
               (onRefresh)="fetchMallSuggestions()"
             ></app-mall-view>
 
-            <app-shop-view *ngIf="activeTab() === 'shop'"></app-shop-view>
+            <!-- SHOP VIEW -->
+            <app-shop-view 
+              *ngIf="isShopTab()"
+              [activeModule]="activeTab()"
+            ></app-shop-view>
+
+            <!-- CLIENT VIEWS -->
             <app-client-view *ngIf="activeTab() === 'client'"></app-client-view>
             <app-client-shops-view *ngIf="activeTab() === 'client-shops'" [isLoggedIn]="isLoggedIn()"></app-client-shops-view>
             <app-client-services-view *ngIf="activeTab() === 'client-services'" [isLoggedIn]="isLoggedIn()"></app-client-services-view>
             <app-client-events-view *ngIf="activeTab() === 'client-events'"></app-client-events-view>
             <app-client-wallet-view *ngIf="activeTab() === 'client-wallet'"></app-client-wallet-view>
 
-            <div *ngIf="activeTab() === 'chat'" [ngClass]="isClientMode() ? 'p-6 md:p-16 max-w-5xl mx-auto' : ''">
+            <!-- SHARED AI ASSISTANT -->
+            <div *ngIf="activeTab() === 'ai-assistant' || (activeTab() === 'chat' && !isLoggedIn())" [ngClass]="isClientMode() ? 'p-6 md:p-16 max-w-5xl mx-auto' : ''">
               <app-chat [messages]="messages()" [isTyping]="isTyping()" (sendMessage)="handleSendMessage($event)" (clearChat)="messages.set([])"></app-chat>
             </div>
           </div>
@@ -144,6 +153,10 @@ export class AppComponent {
 
   isAdminTab() {
     return ['mall', 'finance', 'contracts', 'maintenance', 'infrastructure'].includes(this.activeTab());
+  }
+
+  isShopTab() {
+    return ['shop', 'shop-profile', 'shop-events', 'shop-discounts', 'shop-coupons', 'shop-maintenance', 'shop-subscription', 'shop-chat'].includes(this.activeTab());
   }
 
   handleTabChange(tab: string) {

@@ -245,7 +245,7 @@ interface Floor {
                 <div class="flex flex-col items-center gap-1.5">
                   <span class="text-[11px] font-black uppercase tracking-[0.3em] leading-none">{{ getShopName(room) }}</span>
                   <div class="w-full h-[1px] bg-current opacity-10 my-0.5"></div>
-                  <span *ngIf="room.category === 'parking'" class="text-[9px] font-bold uppercase opacity-60 tracking-wider">
+                  <span *ngIf="room.category === 'parking'" class="text-[9px] font-bold uppercase tracking-wider">
                     {{ getTotalParkingSpots(room) }} LUX Slots
                   </span>
                   <span *ngIf="room.category === 'shop'" class="text-[9px] font-black uppercase opacity-60 tracking-tighter">
@@ -268,8 +268,10 @@ interface Floor {
 })
 export class ThreeDPlanComponent implements AfterViewInit, OnChanges {
   @Input() floors: Floor[] = [];
-  @Input() shops: [] | null = [];
-  @Input() selectedShop: {} | null = null;
+  // Fix error: Property 'shop_name' does not exist on type 'never'. Use any[] to allow property access.
+  @Input() shops: any[] | null = [];
+  // Fix error: Property 'id_box' does not exist on type '{}'. Use any to allow property access.
+  @Input() selectedShop: any | null = null;
   @Input() selectedSpotId: string | null = null;
   @Input() initialFloorIndex: number = 0;
   
