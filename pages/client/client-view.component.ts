@@ -1,5 +1,5 @@
 
-import { Component, AfterViewInit, ElementRef, inject } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { HeroComponent } from './components/hero.component.ts';
@@ -25,7 +25,11 @@ import { FooterComponent } from './components/footer.component.ts';
   ],
   template: `
     <div class="bg-white overflow-x-hidden">
-      <app-hero id="home-section"></app-hero>
+      <app-hero 
+        id="home-section"
+        (onDiscoverMap)="onTabRequest.emit('client-services')"
+        (onViewBoutiques)="onTabRequest.emit('client-shops')"
+      ></app-hero>
       
       <app-univers 
         id="dining-section"
@@ -51,6 +55,7 @@ import { FooterComponent } from './components/footer.component.ts';
   `
 })
 export class ClientViewComponent implements AfterViewInit {
+  @Output() onTabRequest = new EventEmitter<string>();
   private el = inject(ElementRef);
 
   ngAfterViewInit() {

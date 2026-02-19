@@ -28,6 +28,10 @@ export class MasterDataService {
 
   // Active Shop Mock (Elysian Garments = ID 10)
   activeShopId = signal(10);
+  
+  // Track context for client interaction
+  clientActiveShop = signal<ShopProfile | null>(null);
+  isDirectChatOpen = signal(false);
 
   shopProfiles = signal<ShopProfile[]>([
     { user_id: 10, id_type: 1, id_box: 'A-101', shop_name: 'Elysian Garments', logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', cover_pic: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200', description: 'The pinnacle of French luxury fashion. Every stitch tells a story of heritage and innovation.', subscription_status: 'premium' }
@@ -4343,12 +4347,7 @@ export class MasterDataService {
   deleteDiscount(id: number) { this.discounts.update(v => v.filter(d => d.id !== id)); }
 
   addCoupon(coupon: Partial<Coupon>) {
-    const newCoupon = { 
-      id: 'CP-' + Math.floor(Math.random() * 10000), 
-      create_at: new Date().toISOString(), 
-      used_date: null, 
-      ...coupon 
-    } as Coupon;
+    const newCoupon = { id: 'CP-' + Math.floor(Math.random() * 10000), create_at: new Date().toISOString(), used_date: null, ...coupon } as Coupon;
     this.coupons.update(v => [newCoupon, ...v]);
   }
   deleteCoupon(id: string) { this.coupons.update(v => v.filter(c => c.id !== id)); }
@@ -4370,6 +4369,39 @@ export class MasterDataService {
       timestamp: Date.now(),
       messages: [...c.messages, { role: 'shop', content, timestamp: Date.now() }]
     } : c));
+  }
+
+  sendClientMessage(shopId: number, content: string) {
+    const clientId = 'client_001'; // Mocked current user
+    const clientName = 'Julian R.';
+    
+    this.conversations.update(v => {
+      const existingIdx = v.findIndex(c => c.shop_id === shopId && c.client_id === clientId);
+      const msg = { role: 'user' as const, content, timestamp: Date.now() };
+      
+      if (existingIdx !== -1) {
+        const updated = [...v];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          messages: [...updated[existingIdx].messages, msg],
+          last_message: content,
+          timestamp: Date.now(),
+          unread: true
+        };
+        return updated;
+      } else {
+        return [...v, {
+          id: Date.now(),
+          client_name: clientName,
+          client_id: clientId,
+          shop_id: shopId,
+          last_message: content,
+          timestamp: Date.now(),
+          unread: true,
+          messages: [msg]
+        }];
+      }
+    });
   }
 
   startConversation(shopId: number, clientName: string, clientId: string) {

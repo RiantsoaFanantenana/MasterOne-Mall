@@ -1,6 +1,7 @@
 
-import { Component, Output, EventEmitter, Input, signal } from '@angular/core';
+import { Component, Output, EventEmitter, Input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MasterDataService } from '../../services/master-data.service.ts';
 
 @Component({
   selector: 'app-client-navbar',
@@ -74,7 +75,7 @@ import { CommonModule } from '@angular/common';
         <div class="flex justify-between items-center mb-16">
           <div class="flex items-center gap-3">
              <div class="bg-lumina-rust p-1.5 rounded-lg shadow-lg">
-                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
              </div>
              <span class="text-3xl font-black font-outfit tracking-tighter text-white uppercase">MasterOne</span>
           </div>
@@ -109,6 +110,8 @@ export class ClientNavbarComponent {
   @Output() tabChange = new EventEmitter<string>();
   @Output() onLoginRequest = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
+  
+  public data = inject(MasterDataService);
   isMenuOpen = signal(false);
 
   navItems = [

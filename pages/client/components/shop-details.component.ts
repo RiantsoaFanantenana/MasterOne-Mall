@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, AfterViewInit, ElementRef, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MasterDataService } from '../../../services/master-data.service.ts';
-import { ShopProfile } from './shop-list.component.ts';
+import { ShopProfile } from '../../../types.ts';
 import { ShopReviewsListComponent } from './shop-reviews-list.component.ts';
 import { ShopEventsListComponent } from './shop-events-list.component.ts';
 import { ShopDiscountsListComponent } from './shop-discounts-list.component.ts';
@@ -31,6 +31,7 @@ export interface ShopReview {
   ],
   template: `
     <div class="bg-white min-h-screen pb-40 animate-in fade-in duration-700">
+      
       <div class="sticky top-0 z-40 bg-white/95 backdrop-blur-md px-8 md:px-16 lg:px-32 py-5 border-b border-lumina-olive/5 flex items-center justify-between shadow-sm">
         <button (click)="back.emit()" class="group flex items-center gap-4 text-lumina-olive hover:text-lumina-rust transition-all">
           <div class="w-10 h-10 rounded-full border border-lumina-olive/10 flex items-center justify-center group-hover:-translate-x-2 transition-transform bg-white shadow-sm">
@@ -38,14 +39,29 @@ export interface ShopReview {
           </div>
           <span class="text-[11px] font-black uppercase tracking-[0.4em]">Back to Directory</span>
         </button>
+        
         <div class="flex items-center gap-8">
            <div class="hidden sm:flex flex-col items-end">
              <span class="text-[9px] font-black uppercase text-lumina-tan tracking-[0.4em] leading-none mb-2">MasterOne ID</span>
              <span class="text-xs font-black text-lumina-olive leading-none">Box {{ shop.id_box }}</span>
            </div>
+           
            <div class="h-10 w-[1px] bg-lumina-olive/10 hidden sm:block"></div>
            
-           <div class="flex gap-4">
+           <div class="flex items-center gap-3 md:gap-4">
+             <!-- Contextual Shop Chat Trigger -->
+             <button *ngIf="isLoggedIn" 
+                     (click)="data.isDirectChatOpen.set(!data.isDirectChatOpen())"
+                     [ngClass]="data.isDirectChatOpen() ? 'bg-lumina-mint text-white shadow-lg scale-110' : 'bg-lumina-mint/10 text-lumina-mint hover:bg-lumina-mint hover:text-white'"
+                     class="w-12 h-12 rounded-2xl border border-lumina-mint/20 flex items-center justify-center transition-all shadow-sm group relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span class="absolute -top-1 -right-1 w-3 h-3 bg-lumina-rust border-2 border-white rounded-full animate-bounce"></span>
+                <!-- Tooltip -->
+                <div class="absolute top-16 right-0 bg-lumina-dark text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-2xl">
+                  Connect with {{ shop.shop_name }}
+                </div>
+             </button>
+
              <button *ngIf="isLoggedIn" 
                      (click)="onFavoriteToggle.emit()" 
                      class="w-12 h-12 rounded-2xl border flex items-center justify-center transition-all shadow-inner shadow-black/5"
@@ -147,7 +163,7 @@ export class ShopDetailsComponent implements AfterViewInit {
   shopFloorIndex = computed(() => {
     const floors = this.data.mallFloors();
     const idx = floors.findIndex(f => f.rooms.some((r: any) => r.name === this.shop.id_box));
-    return idx >= 0 ? idx : 1; // Default to Floor 1 if not found
+    return idx >= 0 ? idx : 1;
   });
 
   ngAfterViewInit() { this.initLocalRevealObserver(); }

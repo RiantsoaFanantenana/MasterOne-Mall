@@ -15,6 +15,8 @@ import { ClientServicesViewComponent } from './pages/client/client-services-view
 import { ClientEventsViewComponent } from './pages/client/client-events-view.component.ts';
 import { ClientWalletViewComponent } from './pages/client/client-wallet-view.component.ts';
 import { ChatComponent } from './components/chat.component.ts';
+import { ShopDirectChatComponent } from './pages/client/components/shop-direct-chat.component.ts';
+import { LoginModalComponent, UserRole } from './components/login-modal.component.ts';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +34,9 @@ import { ChatComponent } from './components/chat.component.ts';
     ClientServicesViewComponent,
     ClientEventsViewComponent,
     ClientWalletViewComponent,
-    ChatComponent
+    ChatComponent,
+    ShopDirectChatComponent,
+    LoginModalComponent
   ],
   template: `
     <div [ngClass]="isClientMode() ? 'flex flex-col' : 'flex flex-row'" class="h-screen w-full overflow-hidden bg-lumina-cream font-jakarta">
@@ -64,37 +68,12 @@ import { ChatComponent } from './components/chat.component.ts';
 
         <div class="flex-1 overflow-y-auto custom-main-scroll relative h-full" id="main-scroll-container">
           
-          <!-- Auth Modal -->
-          <div *ngIf="showLogin()" class="fixed inset-0 z-[100] flex items-center justify-center bg-lumina-dark/40 backdrop-blur-xl p-6">
-            <div class="bg-white p-10 lg:p-14 rounded-[48px] shadow-3xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-500 border border-lumina-olive/10">
-              <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-lumina-rust rounded-[30px] flex items-center justify-center mx-auto mb-6 shadow-2xl rotate-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                </div>
-                <h2 class="text-4xl font-black text-lumina-olive font-outfit uppercase tracking-tighter">MasterOne Access</h2>
-              </div>
-
-              <div class="space-y-6">
-                <div class="space-y-2">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/40 ml-4">Access Profile</label>
-                  <select [(ngModel)]="loginRole" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold outline-none focus:border-lumina-rust transition-all appearance-none cursor-pointer text-lumina-olive text-sm">
-                    <option value="client">V.I.P. Visitor (Wallet Access)</option>
-                    <option value="mall">Mall Operations Director</option>
-                    <option value="shop">Store Boutique Manager</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2" *ngIf="loginRole !== 'client'">
-                  <label class="text-[10px] font-black uppercase tracking-widest text-lumina-olive/40 ml-4">Secure Passcode</label>
-                  <input type="password" [(ngModel)]="loginPassword" placeholder="••••••••" (keydown.enter)="login()" class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold outline-none focus:border-lumina-rust transition-all text-lumina-olive text-sm" />
-                </div>
-
-                <button (click)="login()" class="w-full py-6 bg-lumina-olive text-white rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-lumina-rust transition-all shadow-2xl active:scale-[0.98] text-xs">
-                  Authorize Entrance
-                </button>
-              </div>
-            </div>
-          </div>
+          <!-- New Independent Auth Modal -->
+          <app-login-modal
+            [isVisible]="showLogin()"
+            (login)="onLogin($event)"
+            (close)="showLogin.set(false)"
+          ></app-login-modal>
 
           <!-- Content Switcher -->
           <div [ngClass]="isClientMode() ? 'w-full' : 'max-w-[1920px] mx-auto w-full p-6 md:p-12 lg:p-16'">
@@ -117,7 +96,10 @@ import { ChatComponent } from './components/chat.component.ts';
             ></app-shop-view>
 
             <!-- CLIENT VIEWS -->
-            <app-client-view *ngIf="activeTab() === 'client'"></app-client-view>
+            <app-client-view 
+              *ngIf="activeTab() === 'client'"
+              (onTabRequest)="handleTabChange($event)"
+            ></app-client-view>
             <app-client-shops-view *ngIf="activeTab() === 'client-shops'" [isLoggedIn]="isLoggedIn()"></app-client-shops-view>
             <app-client-services-view *ngIf="activeTab() === 'client-services'" [isLoggedIn]="isLoggedIn()"></app-client-services-view>
             <app-client-events-view *ngIf="activeTab() === 'client-events'"></app-client-events-view>
@@ -129,6 +111,9 @@ import { ChatComponent } from './components/chat.component.ts';
             </div>
           </div>
         </div>
+
+        <!-- Global Direct Chat Overlay for Clients -->
+        <app-shop-direct-chat *ngIf="isLoggedIn() && isClientMode()"></app-shop-direct-chat>
       </main>
     </div>
   `
@@ -139,8 +124,7 @@ export class AppComponent {
   isLoggedIn = signal(false);
   showLogin = signal(false);
   isSidebarOpen = signal(false);
-  loginRole = 'client'; 
-  loginPassword = '';
+  loginRole: UserRole = 'client'; 
   isTyping = signal(false);
   messages = signal<Message[]>([]);
   mallSuggestions = signal<any[]>([]);
@@ -162,9 +146,13 @@ export class AppComponent {
   handleTabChange(tab: string) {
     this.activeTab.set(tab);
     this.isSidebarOpen.set(false);
+    // Ensure scroll resets when changing tabs
+    const container = document.getElementById('main-scroll-container');
+    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  login() {
+  onLogin(event: { role: UserRole, username: string }) {
+    this.loginRole = event.role;
     this.isLoggedIn.set(true);
     this.showLogin.set(false);
     this.activeTab.set(this.loginRole === 'mall' ? 'mall' : (this.loginRole === 'shop' ? 'shop' : 'client-wallet'));

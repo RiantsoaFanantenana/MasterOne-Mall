@@ -3,21 +3,8 @@ import { Component, Input, signal, computed, Output, EventEmitter } from '@angul
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShopItemComponent } from './shop-item.component.ts';
-
-export interface ShopType {
-  id: number;
-  type_name: string;
-}
-
-export interface ShopProfile {
-  user_id: number;
-  id_type: number;
-  id_box: string;
-  shop_name: string;
-  logo: string;
-  cover_pic: string;
-  description: string;
-}
+// Import types from central types.ts to avoid duplication and fix type mismatches
+import { ShopType, ShopProfile } from '../../../types.ts';
 
 @Component({
   selector: 'app-shop-list',
