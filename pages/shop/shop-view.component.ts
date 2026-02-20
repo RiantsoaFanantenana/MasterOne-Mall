@@ -1,13 +1,13 @@
 
 import { Component, Input, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MasterDataService } from '../../services/master-data.service.ts';
-import { ShopProfileFormComponent } from './components/shop-profile-form.component.ts';
-import { ShopEventsCrudComponent } from './components/shop-events-crud.component.ts';
-import { ShopDiscountsCrudComponent } from './components/shop-discounts-crud.component.ts';
-import { ShopCouponsCrudComponent } from './components/shop-coupons-crud.component.ts';
-import { ShopTicketsManagerComponent } from './components/shop-tickets-manager.component.ts';
-import { ShopChatRoomComponent } from './components/shop-chat-room.component.ts';
+import { MasterDataService } from '../../services/master-data.service';
+import { ShopProfileFormComponent } from './components/shop-profile-form.component';
+import { ShopEventsCrudComponent } from './components/shop-events-crud.component';
+import { ShopDiscountsCrudComponent } from './components/shop-discounts-crud.component';
+import { ShopCouponsCrudComponent } from './components/shop-coupons-crud.component';
+import { ShopTicketsManagerComponent } from './components/shop-tickets-manager.component';
+import { ShopChatRoomComponent } from './components/shop-chat-room.component';
 
 @Component({
   selector: 'app-shop-view',

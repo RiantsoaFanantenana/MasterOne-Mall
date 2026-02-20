@@ -1,11 +1,11 @@
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardComponent } from '../../components/dashboard.component.ts';
-import { FinanceViewComponent } from './finance-view.component.ts';
-import { ContractsViewComponent } from './contracts-view.component.ts';
-import { MaintenanceViewComponent } from './maintenance-view.component.ts';
-import { InfrastructureViewComponent } from './infrastructure-view.component.ts';
+import { DashboardComponent } from '../../components/dashboard.component';
+import { FinanceViewComponent } from './finance-view.component';
+import { ContractsViewComponent } from './contracts-view.component';
+import { MaintenanceViewComponent } from './maintenance-view.component';
+import { InfrastructureViewComponent } from './infrastructure-view.component';
 
 @Component({
   selector: 'app-mall-view',

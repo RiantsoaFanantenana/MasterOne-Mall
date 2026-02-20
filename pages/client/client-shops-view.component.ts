@@ -1,14 +1,14 @@
 
 import { Component, AfterViewInit, ElementRef, inject, signal, effect, OnInit, Input, computed, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShopListComponent } from './components/shop-list.component.ts';
+import { ShopListComponent } from './components/shop-list.component';
 // Import correct types from central types.ts to ensure property matching
-import { ShopType, ShopProfile } from '../../types.ts';
-import { ShopDetailsComponent, ShopReview } from './components/shop-details.component.ts';
-import { ShopItemComponent } from './components/shop-item.component.ts';
-import { FooterComponent } from './components/footer.component.ts';
-import { ShopCarouselComponent } from './components/shop-carousel.component.ts';
-import { MasterDataService } from '../../services/master-data.service.ts';
+import { ShopType, ShopProfile } from '../../types';
+import { ShopDetailsComponent, ShopReview } from './components/shop-details.component';
+import { ShopItemComponent } from './components/shop-item.component';
+import { FooterComponent } from './components/footer.component';
+import { ShopCarouselComponent } from './components/shop-carousel.component';
+import { MasterDataService } from '../../services/master-data.service';
 
 @Component({
   selector: 'app-client-shops-view',

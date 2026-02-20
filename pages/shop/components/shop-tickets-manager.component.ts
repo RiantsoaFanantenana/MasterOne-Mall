@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BoxTicket } from '../../../types.ts';
+import { BoxTicket } from '../../../types';
 
 @Component({
   selector: 'app-shop-tickets-manager',

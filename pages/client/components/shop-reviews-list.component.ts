@@ -1,8 +1,8 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShopReviewItemComponent } from './shop-review-item.component.ts';
-import { ShopReview } from './shop-details.component.ts';
+import { ShopReviewItemComponent } from './shop-review-item.component';
+import { ShopReview } from './shop-details.component';
 
 @Component({
   selector: 'app-shop-reviews-list',

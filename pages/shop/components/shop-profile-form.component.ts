@@ -2,9 +2,9 @@
 import { Component, Input, Output, EventEmitter, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopProfile } from '../../../types.ts';
-import { ShopDetailsComponent } from '../../client/components/shop-details.component.ts';
-import { MasterDataService } from '../../../services/master-data.service.ts';
+import { ShopProfile } from '../../../types';
+import { ShopDetailsComponent } from '../../client/components/shop-details.component';
+import { MasterDataService } from '../../../services/master-data.service';
 
 @Component({
   selector: 'app-shop-profile-form',

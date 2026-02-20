@@ -2,10 +2,10 @@
 import { Component, AfterViewInit, ElementRef, inject, signal, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FooterComponent } from './components/footer.component.ts';
-import { ScheduleItemComponent } from './components/schedule-item.component.ts';
-import { ThreeDPlanComponent } from '../mall/components/three-d-plan.component.ts';
-import { MasterDataService } from '../../services/master-data.service.ts';
+import { FooterComponent } from './components/footer.component';
+import { ScheduleItemComponent } from './components/schedule-item.component';
+import { ThreeDPlanComponent } from '../mall/components/three-d-plan.component';
+import { MasterDataService } from '../../services/master-data.service';
 
 interface OpeningHour { id: number; day: string; start_time: string; end_time: string; }
 interface ExceptionalOpening { id: number; date: string; start_time: string; end_time: string; }

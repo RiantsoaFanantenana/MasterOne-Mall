@@ -2,9 +2,9 @@
 import { Component, Input, signal, computed, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopItemComponent } from './shop-item.component.ts';
+import { ShopItemComponent } from './shop-item.component';
 // Import types from central types.ts to avoid duplication and fix type mismatches
-import { ShopType, ShopProfile } from '../../../types.ts';
+import { ShopType, ShopProfile } from '../../../types';
 
 @Component({
   selector: 'app-shop-list',

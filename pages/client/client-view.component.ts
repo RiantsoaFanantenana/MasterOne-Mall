@@ -2,13 +2,13 @@
 import { Component, AfterViewInit, ElementRef, inject, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { HeroComponent } from './components/hero.component.ts';
-import { UniversComponent } from './components/univers.component.ts';
-import { ShopCarouselComponent } from './components/shop-carousel.component.ts';
-import { ServicesListComponent } from './components/services-list.component.ts';
-import { GalleryComponent } from './components/gallery.component.ts';
-import { EventsComponent } from './components/events.component.ts';
-import { FooterComponent } from './components/footer.component.ts';
+import { HeroComponent } from './components/hero.component';
+import { UniversComponent } from './components/univers.component';
+import { ShopCarouselComponent } from './components/shop-carousel.component';
+import { ServicesListComponent } from './components/services-list.component';
+import { GalleryComponent } from './components/gallery.component';
+import { EventsComponent } from './components/events.component';
+import { FooterComponent } from './components/footer.component';
 
 @Component({
   selector: 'app-client-view',
