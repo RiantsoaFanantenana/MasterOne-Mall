@@ -2,13 +2,13 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MasterDataService } from '../../services/master-data.service';
-import { BoxRowComponent } from './components/box-row.component';
-import { SubscriptionCardComponent } from './components/subscription-card.component';
-import { BoxRegistrationComponent } from './components/box-registration.component';
-import { CategoryRegistrationComponent } from './components/category-registration.component';
-import { SubscriptionRegistrationComponent } from './components/subscription-registration.component';
-import { ThreeDPlanComponent } from './components/three-d-plan.component';
+import { MasterDataService } from '../../services/master-data.service.ts';
+import { BoxRowComponent } from './components/box-row.component.ts';
+import { SubscriptionCardComponent } from './components/subscription-card.component.ts';
+import { BoxRegistrationComponent } from './components/box-registration.component.ts';
+import { CategoryRegistrationComponent } from './components/category-registration.component.ts';
+import { SubscriptionRegistrationComponent } from './components/subscription-registration.component.ts';
+import { ThreeDPlanComponent } from './components/three-d-plan.component.ts';
 
 @Component({
   selector: 'app-infrastructure-view',

@@ -1,7 +1,7 @@
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SubscriptionType } from '../../../types';
+import { SubscriptionType } from '../../../types.ts';
 
 @Component({
   selector: 'app-subscription-card',

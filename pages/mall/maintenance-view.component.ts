@@ -1,7 +1,7 @@
 
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MaintenanceTicketComponent } from './components/maintenance-ticket.component';
+import { MaintenanceTicketComponent } from './components/maintenance-ticket.component.ts';
 
 interface Ticket {
   id: number;

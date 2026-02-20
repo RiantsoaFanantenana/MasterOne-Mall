@@ -1,8 +1,8 @@
 
 import { Component, Input, Output, EventEmitter, inject, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EventReviewsListComponent, EventReview } from './event-reviews-list.component';
-import { ShopReviewFormComponent } from './shop-review-form.component';
+import { EventReviewsListComponent, EventReview } from './event-reviews-list.component.ts';
+import { ShopReviewFormComponent } from './shop-review-form.component.ts';
 
 @Component({
   selector: 'app-event-details',

@@ -1,7 +1,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShopDiscountItemComponent } from './shop-discount-item.component';
+import { ShopDiscountItemComponent } from './shop-discount-item.component.ts';
 
 @Component({
   selector: 'app-shop-discounts-list',

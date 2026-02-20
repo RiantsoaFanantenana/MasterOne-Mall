@@ -1,7 +1,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShopProfile } from '../../../types';
+import { ShopProfile } from '../../../types.ts';
 
 @Component({
   selector: '[app-merchant-row]',

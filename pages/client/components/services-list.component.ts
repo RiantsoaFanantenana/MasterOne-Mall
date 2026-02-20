@@ -1,7 +1,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServiceItemComponent } from './service-item.component';
+import { ServiceItemComponent } from './service-item.component.ts';
 
 @Component({
   selector: 'app-services-list',

@@ -1,7 +1,7 @@
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SafeHtmlPipe } from '../pipes/safe-html.pipe';
+import { SafeHtmlPipe } from '../pipes/safe-html.pipe.ts';
 
 @Component({
   selector: 'app-dashboard',

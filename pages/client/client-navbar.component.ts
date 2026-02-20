@@ -1,7 +1,7 @@
 
 import { Component, Output, EventEmitter, Input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MasterDataService } from '../../services/master-data.service';
+import { MasterDataService } from '../../services/master-data.service.ts';
 
 @Component({
   selector: 'app-client-navbar',

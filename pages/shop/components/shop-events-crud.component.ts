@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MallEvent } from '../../../types';
+import { MallEvent } from '../../../types.ts';
 
 @Component({
   selector: 'app-shop-events-crud',

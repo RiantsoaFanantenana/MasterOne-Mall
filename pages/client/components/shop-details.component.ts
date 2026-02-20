@@ -1,13 +1,13 @@
 
 import { Component, Input, Output, EventEmitter, AfterViewInit, ElementRef, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MasterDataService } from '../../../services/master-data.service';
-import { ShopProfile } from '../../../types';
-import { ShopReviewsListComponent } from './shop-reviews-list.component';
-import { ShopEventsListComponent } from './shop-events-list.component';
-import { ShopDiscountsListComponent } from './shop-discounts-list.component';
-import { ShopReviewFormComponent } from './shop-review-form.component';
-import { ThreeDPlanComponent } from '../../mall/components/three-d-plan.component';
+import { MasterDataService } from '../../../services/master-data.service.ts';
+import { ShopProfile } from '../../../types.ts';
+import { ShopReviewsListComponent } from './shop-reviews-list.component.ts';
+import { ShopEventsListComponent } from './shop-events-list.component.ts';
+import { ShopDiscountsListComponent } from './shop-discounts-list.component.ts';
+import { ShopReviewFormComponent } from './shop-review-form.component.ts';
+import { ThreeDPlanComponent } from '../../mall/components/three-d-plan.component.ts';
 
 export interface ShopReview {
   id: number;

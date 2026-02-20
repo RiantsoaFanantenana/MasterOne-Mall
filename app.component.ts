@@ -2,21 +2,21 @@
 import { Component, signal, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GeminiService } from './services/gemini.service';
-import { Message } from './types';
-import { SidebarComponent } from './components/sidebar.component';
-import { HeaderComponent } from './components/header.component';
-import { ClientNavbarComponent } from './pages/client/client-navbar.component';
-import { MallViewComponent } from './pages/mall/mall-view.component';
-import { ShopViewComponent } from './pages/shop/shop-view.component';
-import { ClientViewComponent } from './pages/client/client-view.component';
-import { ClientShopsViewComponent } from './pages/client/client-shops-view.component';
-import { ClientServicesViewComponent } from './pages/client/client-services-view.component';
-import { ClientEventsViewComponent } from './pages/client/client-events-view.component';
-import { ClientWalletViewComponent } from './pages/client/client-wallet-view.component';
-import { ChatComponent } from './components/chat.component';
-import { ShopDirectChatComponent } from './pages/client/components/shop-direct-chat.component';
-import { LoginModalComponent, UserRole } from './components/login-modal.component';
+import { GeminiService } from './services/gemini.service.ts';
+import { Message } from './types.ts';
+import { SidebarComponent } from './components/sidebar.component.ts';
+import { HeaderComponent } from './components/header.component.ts';
+import { ClientNavbarComponent } from './pages/client/client-navbar.component.ts';
+import { MallViewComponent } from './pages/mall/mall-view.component.ts';
+import { ShopViewComponent } from './pages/shop/shop-view.component.ts';
+import { ClientViewComponent } from './pages/client/client-view.component.ts';
+import { ClientShopsViewComponent } from './pages/client/client-shops-view.component.ts';
+import { ClientServicesViewComponent } from './pages/client/client-services-view.component.ts';
+import { ClientEventsViewComponent } from './pages/client/client-events-view.component.ts';
+import { ClientWalletViewComponent } from './pages/client/client-wallet-view.component.ts';
+import { ChatComponent } from './components/chat.component.ts';
+import { ShopDirectChatComponent } from './pages/client/components/shop-direct-chat.component.ts';
+import { LoginModalComponent, UserRole } from './components/login-modal.component.ts';
 
 @Component({
   selector: 'app-root',

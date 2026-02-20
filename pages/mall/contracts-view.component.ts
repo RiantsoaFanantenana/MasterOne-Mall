@@ -2,9 +2,9 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MasterDataService } from '../../services/master-data.service';
-import { ShopProfile, OpeningHour, OpeningHourException } from '../../types';
-import { MerchantRowComponent } from './components/merchant-row.component';
+import { MasterDataService } from '../../services/master-data.service.ts';
+import { ShopProfile, OpeningHour, OpeningHourException } from '../../types.ts';
+import { MerchantRowComponent } from './components/merchant-row.component.ts';
 
 @Component({
   selector: 'app-contracts-view',

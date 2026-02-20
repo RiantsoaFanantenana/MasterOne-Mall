@@ -16,10 +16,8 @@
               "base": "./dist",
               "browser": "."
             },
-            "index": "index.html",
             "browser": "index.tsx",
-            "tsConfig": "tsconfig.json",
-            "allowedCommonJsDependencies": ["p-retry", "p-queue", "p-timeout"]
+            "tsConfig": "tsconfig.json"
           },
           "configurations": {
             "production": {

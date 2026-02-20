@@ -1,11 +1,11 @@
 
 import { Component, AfterViewInit, ElementRef, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FooterComponent } from './components/footer.component';
-import { EventItemComponent } from './components/event-item.component';
-import { DiscountItemComponent } from './components/discount-item.component';
-import { EventDetailsComponent } from './components/event-details.component';
-import { EventReview } from './components/event-reviews-list.component';
+import { FooterComponent } from './components/footer.component.ts';
+import { EventItemComponent } from './components/event-item.component.ts';
+import { DiscountItemComponent } from './components/discount-item.component.ts';
+import { EventDetailsComponent } from './components/event-details.component.ts';
+import { EventReview } from './components/event-reviews-list.component.ts';
 
 interface MallEvent {
   id: number;

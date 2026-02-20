@@ -1,7 +1,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EventReviewItemComponent } from './event-review-item.component';
+import { EventReviewItemComponent } from './event-review-item.component.ts';
 
 export interface EventReview {
   id: number;
