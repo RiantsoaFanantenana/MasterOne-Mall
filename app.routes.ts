@@ -1,3 +1,4 @@
+// app.routes.ts
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
@@ -15,11 +16,19 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/client/client-shops-view.component').then(m => m.ClientShopsViewComponent)
   },
   {
+    path: 'client/shop/:id',  // ← NOUVEAU : Détail d'une boutique
+    loadComponent: () => import('./pages/client/client-shops-view.component').then(m => m.ClientShopsViewComponent)
+  },
+  {
     path: 'client/services',
     loadComponent: () => import('./pages/client/client-services-view.component').then(m => m.ClientServicesViewComponent)
   },
   {
     path: 'client/events',
+    loadComponent: () => import('./pages/client/client-events-view.component').then(m => m.ClientEventsViewComponent)
+  },
+  {
+    path: 'client/event/:id',  // ← NOUVEAU : Détail d'un événement
     loadComponent: () => import('./pages/client/client-events-view.component').then(m => m.ClientEventsViewComponent)
   },
   {

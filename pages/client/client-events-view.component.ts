@@ -9,6 +9,7 @@ import { EventReview } from './components/event-reviews-list.component';
 import { ApiService, EventResponse } from '../../services/api.service';
 import { MasterDataService } from '../../services/master-data.service';
 import { AuthService } from '../../services/auth.service'; // ← IMPORT
+import { ActivatedRoute } from '@angular/router';
 
 interface MallEvent {
   id: number;
@@ -150,9 +151,8 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
                 [status]="event.status"
                 [isPublic]="event.is_public"
                 [shopId]="event.shop_id"
+                [eventId]="event.id"  // ← AJOUT
                 [staggerClass]="'stagger-' + (i % 6 + 1)"
-                (click)="selectedEvent.set(event)"
-                class="cursor-pointer"
               ></app-event-item>
             </div>
 
@@ -268,8 +268,34 @@ export class ClientEventsViewComponent implements AfterViewInit {
     });
   }
 
+  private route = inject(ActivatedRoute);
+
   ngOnInit() {
     this.loadInitialData();
+    
+    // Vérifier si un événement est sélectionné dans l'URL
+    this.route.params.subscribe(params => {
+      const eventId = params['id'];
+      if (eventId) {
+        const event = this.allEvents().find(e => e.id === parseInt(eventId));
+        if (event) {
+          this.selectedEvent.set(event);
+        }
+      } else {
+        // Sinon, vérifier les query params (pour compatibilité)
+        const queryParams = new URLSearchParams(window.location.search);
+        const queryEventId = queryParams.get('eventId');
+        if (queryEventId) {
+          const event = this.allEvents().find(e => e.id === parseInt(queryEventId));
+          if (event) this.selectedEvent.set(event);
+        }
+      }
+    });
+  }
+
+  // Ajouter une méthode pour naviguer vers un événement
+  navigateToEvent(event: MallEvent) {
+    this.router.navigate(['/client/event', event.id]);
   }
 
   ngAfterViewInit() {
