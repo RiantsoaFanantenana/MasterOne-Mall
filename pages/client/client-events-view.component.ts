@@ -1,7 +1,7 @@
 // pages/client/client-events-view.component.ts
 import { Component, AfterViewInit, ElementRef, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router'; // ← IMPORT Router
+import { Router, ActivatedRoute } from '@angular/router';
 import { FooterComponent } from './components/footer.component';
 import { EventItemComponent } from './components/event-item.component';
 import { DiscountItemComponent } from './components/discount-item.component';
@@ -11,6 +11,7 @@ import { ApiService, EventResponse } from '../../services/api.service';
 import { MasterDataService } from '../../services/master-data.service';
 import { AuthService } from '../../services/auth.service';
 
+// Interface adaptée à votre API
 interface MallEvent {
   id: number;
   shop_id: string;
@@ -21,6 +22,7 @@ interface MallEvent {
   is_public: boolean;
   created_at: string;
   status: 'draft' | 'published' | 'archived' | 'cancelled';
+  location?: string;
 }
 
 interface Discount {
@@ -33,31 +35,172 @@ interface Discount {
   end_date: string;
   status: string;
   created_at: string;
+  discountPercentage?: number;
 }
 
 // ==================== MOCK DATA ====================
 const MOCK_EVENTS: MallEvent[] = [
-  { id: 1, shop_id: 'LUXE-01', title: 'Winter Collection Gala', description: 'Experience the unveiling of the most anticipated winter collection of the year. Featuring exclusive pieces from Parisian designers.', start_date: '2024-11-20', end_date: '2024-11-22', is_public: false, created_at: '2024-10-01', status: 'published' },
-  { id: 2, shop_id: 'TECH-12', title: 'Future of Tech Expo', description: 'Dive into the latest innovations in smart home and wearable tech. Hands-on demos available all day.', start_date: '2024-12-05', end_date: '2024-12-07', is_public: true, created_at: '2024-10-15', status: 'published' },
-  { id: 3, shop_id: 'KIDS-05', title: 'Holiday Toy Workshop', description: 'Bring the kids for a day of creativity and fun. Build-your-own toy sessions with master craftsmen.', start_date: '2024-12-15', end_date: '2024-12-24', is_public: true, created_at: '2024-11-01', status: 'published' },
-  { id: 4, shop_id: 'FOOD-09', title: 'Wine & Cheese Pairing', description: 'Join our sommelier for an evening of exquisite French wine and artisanal cheese pairings.', start_date: '2024-11-28', end_date: '2024-11-28', is_public: false, created_at: '2024-10-20', status: 'published' },
-  { id: 5, shop_id: 'LUXE-02', title: 'Midnight Runway', description: 'A nocturnal showcase of avant-garde streetwear under the stars of the central atrium.', start_date: '2024-12-10', end_date: '2024-12-10', is_public: false, created_at: '2024-11-05', status: 'published' },
-  { id: 6, shop_id: 'ART-01', title: 'Sculpture & Silk', description: 'Modern art meeting traditional textiles in a unique pop-up exhibition.', start_date: '2024-12-12', end_date: '2024-12-15', is_public: true, created_at: '2024-11-08', status: 'published' }
+  { 
+    id: 1, 
+    shop_id: 'LUXE-01', 
+    title: 'Winter Collection Gala', 
+    description: 'Experience the unveiling of the most anticipated winter collection of the year.', 
+    start_date: '2024-11-20', 
+    end_date: '2024-11-22', 
+    is_public: false, 
+    created_at: '2024-10-01', 
+    status: 'published',
+    location: 'Mall Central'
+  },
+  { 
+    id: 2, 
+    shop_id: 'TECH-12', 
+    title: 'Future of Tech Expo', 
+    description: 'Dive into the latest innovations in smart home and wearable tech.', 
+    start_date: '2024-12-05', 
+    end_date: '2024-12-07', 
+    is_public: true, 
+    created_at: '2024-10-15', 
+    status: 'published' 
+  },
+  { 
+    id: 3, 
+    shop_id: 'KIDS-05', 
+    title: 'Holiday Toy Workshop', 
+    description: 'Bring the kids for a day of creativity and fun.', 
+    start_date: '2024-12-15', 
+    end_date: '2024-12-24', 
+    is_public: true, 
+    created_at: '2024-11-01', 
+    status: 'published' 
+  },
+  { 
+    id: 4, 
+    shop_id: 'FOOD-09', 
+    title: 'Wine & Cheese Pairing', 
+    description: 'Join our sommelier for an evening of exquisite French wine and artisanal cheese pairings.', 
+    start_date: '2024-11-28', 
+    end_date: '2024-11-28', 
+    is_public: false, 
+    created_at: '2024-10-20', 
+    status: 'published' 
+  },
+  { 
+    id: 5, 
+    shop_id: 'LUXE-02', 
+    title: 'Midnight Runway', 
+    description: 'A nocturnal showcase of avant-garde streetwear.', 
+    start_date: '2024-12-10', 
+    end_date: '2024-12-10', 
+    is_public: false, 
+    created_at: '2024-11-05', 
+    status: 'published' 
+  },
+  { 
+    id: 6, 
+    shop_id: 'ART-01', 
+    title: 'Sculpture & Silk', 
+    description: 'Modern art meeting traditional textiles.', 
+    start_date: '2024-12-12', 
+    end_date: '2024-12-15', 
+    is_public: true, 
+    created_at: '2024-11-08', 
+    status: 'published' 
+  }
 ];
 
 const MOCK_DISCOUNTS: Discount[] = [
-  { id: 1, shop_id: 'SHOP-01', title: 'Winter Season Opening', description: 'Exclusive early bird discount for our new winter outerwear line.', value: '25%', start_date: '2024-11-01', end_date: '2024-11-30', status: 'Active Deal', created_at: '2024-10-25' },
-  { id: 2, shop_id: 'JEWEL-04', title: 'Lumina Anniversary', description: 'Celebrate our 10th anniversary with rare offers on diamond collections.', value: '15%', start_date: '2024-11-15', end_date: '2024-11-25', status: 'Flash Sale', created_at: '2024-10-28' },
-  { id: 3, shop_id: 'SPORT-10', title: 'Performance Weekend', description: '30% off on all athletic footwear. Limited time only.', value: '30%', start_date: '2024-11-23', end_date: '2024-11-24', status: 'Active Deal', created_at: '2024-11-05' },
-  { id: 4, shop_id: 'HOME-02', title: 'Artisan Decor Sale', description: 'Buy 1 Get 1 on handcrafted ceramics and home accessories.', value: 'BOGO', start_date: '2024-11-01', end_date: '2024-11-15', status: 'Member Exclusive', created_at: '2024-10-10' },
-  { id: 5, shop_id: 'LUXE-05', title: 'Handbag VIP Week', description: 'Members get 40% off on luxury Italian handbags during our private week.', value: '40%', start_date: '2024-12-01', end_date: '2024-12-07', status: 'Upcoming', created_at: '2024-11-01' }
+  { 
+    id: 1, 
+    shop_id: 'SHOP-01', 
+    title: 'Winter Season Opening', 
+    description: 'Exclusive early bird discount for our new winter outerwear line.', 
+    value: '25%', 
+    start_date: '2024-11-01', 
+    end_date: '2024-11-30', 
+    status: 'Active Deal', 
+    created_at: '2024-10-25',
+    discountPercentage: 25
+  },
+  { 
+    id: 2, 
+    shop_id: 'JEWEL-04', 
+    title: 'Lumina Anniversary', 
+    description: 'Celebrate our 10th anniversary with rare offers on diamond collections.', 
+    value: '15%', 
+    start_date: '2024-11-15', 
+    end_date: '2024-11-25', 
+    status: 'Flash Sale', 
+    created_at: '2024-10-28' 
+  },
+  { 
+    id: 3, 
+    shop_id: 'SPORT-10', 
+    title: 'Performance Weekend', 
+    description: '30% off on all athletic footwear.', 
+    value: '30%', 
+    start_date: '2024-11-23', 
+    end_date: '2024-11-24', 
+    status: 'Active Deal', 
+    created_at: '2024-11-05' 
+  },
+  { 
+    id: 4, 
+    shop_id: 'HOME-02', 
+    title: 'Artisan Decor Sale', 
+    description: 'Buy 1 Get 1 on handcrafted ceramics and home accessories.', 
+    value: 'BOGO', 
+    start_date: '2024-11-01', 
+    end_date: '2024-11-15', 
+    status: 'Member Exclusive', 
+    created_at: '2024-10-10' 
+  },
+  { 
+    id: 5, 
+    shop_id: 'LUXE-05', 
+    title: 'Handbag VIP Week', 
+    description: 'Members get 40% off on luxury Italian handbags.', 
+    value: '40%', 
+    start_date: '2024-12-01', 
+    end_date: '2024-12-07', 
+    status: 'Upcoming', 
+    created_at: '2024-11-01' 
+  }
 ];
 
 const MOCK_EVENT_REVIEWS: EventReview[] = [
-  { id: 1, create_at: '2024-11-21', event_id: 1, client_id: 'Sophie L.', description: 'Magnificent runway show. The craftsmanship was beyond words.', stars: 10 },
-  { id: 2, create_at: '2024-11-22', event_id: 1, client_id: 'David P.', description: 'Exclusive and well organized. Lumina really knows how to host.', stars: 9 },
-  { id: 3, create_at: '2024-12-06', event_id: 2, client_id: 'Marc A.', description: 'Loved the smart home demos. Very inspiring.', stars: 8 },
-  { id: 4, create_at: '2024-11-29', event_id: 4, client_id: 'Isabelle Q.', description: 'The pairings were sublime. A true gastronomic journey.', stars: 10 }
+  { 
+    id: 1, 
+    create_at: '2024-11-21', 
+    event_id: 1, 
+    client_id: 'Sophie L.', 
+    description: 'Magnificent runway show. The craftsmanship was beyond words.', 
+    stars: 10 
+  },
+  { 
+    id: 2, 
+    create_at: '2024-11-22', 
+    event_id: 1, 
+    client_id: 'David P.', 
+    description: 'Exclusive and well organized. Lumina really knows how to host.', 
+    stars: 9 
+  },
+  { 
+    id: 3, 
+    create_at: '2024-12-06', 
+    event_id: 2, 
+    client_id: 'Marc A.', 
+    description: 'Loved the smart home demos. Very inspiring.', 
+    stars: 8 
+  },
+  { 
+    id: 4, 
+    create_at: '2024-11-29', 
+    event_id: 4, 
+    client_id: 'Isabelle Q.', 
+    description: 'The pairings were sublime. A true gastronomic journey.', 
+    stars: 10 
+  }
 ];
 
 @Component({
@@ -65,7 +208,7 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
   standalone: true,
   imports: [CommonModule, FooterComponent, EventItemComponent, DiscountItemComponent, EventDetailsComponent],
   template: `
-    <!-- Debug indicator (à retirer plus tard) -->
+    <!-- Debug indicator -->
     <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black">
       Auth: {{ authService.isLoggedIn() ? '✅ YES' : '❌ NO' }}
     </div>
@@ -91,7 +234,7 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
         
         <!-- List Mode -->
         <ng-container *ngIf="!selectedEvent()">
-          <!-- Header Section avec personnalisation selon login -->
+          <!-- Header Section -->
           <section class="py-20 px-8 md:px-16 max-w-[1400px] mx-auto text-center reveal-header">
             <h2 class="text-lumina-rust font-black uppercase tracking-[0.5em] text-[10px] mb-4">Mall Highlights</h2>
             <h1 class="text-5xl md:text-7xl font-black font-outfit text-lumina-olive tracking-tighter mb-8 leading-none">
@@ -100,12 +243,12 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
             <p class="text-lumina-tan text-sm font-medium max-w-2xl mx-auto">
               {{ authService.isLoggedIn() 
                 ? 'Discover events tailored to your preferences. Book your spot for exclusive experiences.'
-                : 'Experience the unique blend of culture and commerce at Lumina. From VIP runway shows to exclusive seasonal discounts.' 
+                : 'Experience the unique blend of culture and commerce at Lumina.' 
               }}
             </p>
           </section>
 
-          <!-- Member-only events banner (visible si connecté) -->
+          <!-- Member-only events banner -->
           <div *ngIf="authService.isLoggedIn() && memberEvents().length > 0" class="mb-8 px-8 md:px-16 max-w-[1400px] mx-auto">
             <div class="bg-lumina-rust/10 border border-lumina-rust/20 p-6 rounded-3xl flex items-center justify-between">
               <div class="flex items-center gap-4">
@@ -147,7 +290,7 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
                 [image]="getEventImage(event.id)"
                 [title]="event.title"
                 [description]="event.description"
-                [dateRange]="(event.start_date | date:'MMM d') + ' — ' + (event.end_date | date:'MMM d')"
+                [dateRange]="formatEventDateRange(event)"
                 [status]="event.status"
                 [isPublic]="event.is_public"
                 [shopId]="event.shop_id"
@@ -210,7 +353,7 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
   private apiService = inject(ApiService);
   private data = inject(MasterDataService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router); // ← Injection du Router
+  private router = inject(Router);
   public authService = inject(AuthService);
   
   // États
@@ -273,25 +416,15 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
     this.route.params.subscribe(params => {
       const eventId = params['id'];
       if (eventId) {
-        // Attendre que les données soient chargées
         const checkEvent = () => {
           const event = this.allEvents().find(e => e.id === parseInt(eventId));
           if (event) {
             this.selectedEvent.set(event);
           } else {
-            // Réessayer après un délai si l'événement n'est pas encore chargé
             setTimeout(checkEvent, 100);
           }
         };
         checkEvent();
-      } else {
-        // Sinon, vérifier les query params (pour compatibilité)
-        const queryParams = new URLSearchParams(window.location.search);
-        const queryEventId = queryParams.get('eventId');
-        if (queryEventId) {
-          const event = this.allEvents().find(e => e.id === parseInt(queryEventId));
-          if (event) this.selectedEvent.set(event);
-        }
       }
     });
   }
@@ -300,20 +433,41 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
     this.initRevealObserver();
   }
 
-  // Méthode pour naviguer vers un événement
+  // Méthode pour formater la plage de dates
+  formatEventDateRange(event: MallEvent): string {
+    const start = new Date(event.start_date);
+    const end = new Date(event.end_date);
+    
+    if (start.toDateString() === end.toDateString()) {
+      return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  }
+
   navigateToEvent(event: MallEvent) {
     this.router.navigate(['/client/event', event.id]);
   }
 
   handleLoginRequest() {
-    console.log('Login requested from event details');
+    this.router.navigate(['/auth/login'], { 
+      queryParams: { returnUrl: this.router.url } 
+    });
   }
 
   handleBookEvent(event: any) {
+    if (!this.authService.isLoggedIn()) {
+      this.handleLoginRequest();
+      return;
+    }
     console.log('Booking event:', event);
   }
 
   handleRegisterForEvent(event: any) {
+    if (!this.authService.isLoggedIn()) {
+      this.handleLoginRequest();
+      return;
+    }
     console.log('Registering for event:', event);
   }
 
@@ -351,18 +505,20 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
               end_date: e.eventDate,
               is_public: e.isPublic,
               created_at: new Date().toISOString(),
-              status: e.status
+              status: e.status as 'draft' | 'published' | 'archived' | 'cancelled',
+              location: e.location
             }));
             
             this.allEvents.set(mappedEvents);
           } else {
-            console.log('No events from API, using mock data');
+            console.log('API returned empty events array, using mock data');
             this.allEvents.set(MOCK_EVENTS);
           }
           resolve();
         },
         error: (error) => {
-          console.error('Error loading events, using mock data:', error);
+          console.error('Error loading events from API:', error);
+          console.log('FALLBACK: Using mock events data');
           this.allEvents.set(MOCK_EVENTS);
           resolve();
         }
@@ -372,18 +528,39 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
 
   private loadDiscounts(): Promise<void> {
     return new Promise((resolve) => {
-      setTimeout(() => {
-        this.allDiscounts.set(MOCK_DISCOUNTS);
-        resolve();
-      }, 300);
+      // API des coupons pas encore disponible, on utilise directement les mock data
+      console.log('Using mock discounts data');
+      this.allDiscounts.set(MOCK_DISCOUNTS);
+      resolve();
     });
   }
 
   private loadReviews(): Promise<void> {
     return new Promise((resolve) => {
+      // API des reviews d'événements pas encore disponible, on utilise les mock data
+      console.log('Using mock event reviews data');
       this.allReviews.set(MOCK_EVENT_REVIEWS);
       resolve();
     });
+  }
+
+  private getDiscountStatus(validUntil: string): string {
+    const today = new Date();
+    const endDate = new Date(validUntil);
+    
+    if (endDate < today) {
+      return 'Expired';
+    }
+    
+    const daysUntilEnd = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilEnd <= 3) {
+      return 'Flash Sale';
+    } else if (daysUntilEnd <= 7) {
+      return 'Active Deal';
+    } else {
+      return 'Upcoming';
+    }
   }
 
   getEventImage(id: number) {
