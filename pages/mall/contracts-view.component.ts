@@ -8,6 +8,20 @@ import { MasterDataService } from '../../services/master-data.service';
 import { ShopProfile, OpeningHour, OpeningHourException } from '../../types';
 import { ContractEndingSoonResponse } from '../../services/api.service';
 
+// Interface pour les boxes avec le format réel de l'API
+interface Box {
+  _id: string;  // MongoDB ObjectId (ex: "69a5bfd00fc57c1b35cf5089")
+  boxNumber: string;  // Le numéro de box (ex: "BOX-B6")
+  floorId: string;
+  floorName: string;
+  category: string;
+  polygon: Array<{x: number, y: number}>;
+  surfaceArea: number;
+  isAvailable: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Interface étendue pour inclure contract_end
 interface ExtendedShopProfile extends ShopProfile {
   contract_end?: string;
@@ -16,7 +30,7 @@ interface ExtendedShopProfile extends ShopProfile {
 @Component({
   selector: 'app-contracts-view',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Supprimé MerchantRowComponent
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="space-y-12 animate-in fade-in duration-700">
       <!-- En-tête avec alertes -->
@@ -253,12 +267,18 @@ interface ExtendedShopProfile extends ShopProfile {
                 <select [(ngModel)]="form.boxId" 
                         [disabled]="isSubmitting()"
                         class="w-full px-8 py-5 bg-lumina-cream border border-lumina-olive/10 rounded-3xl font-bold text-lumina-olive font-outfit outline-none focus:border-lumina-rust focus:ring-4 focus:ring-lumina-rust/5 transition-all shadow-inner shadow-black/5 text-lg appearance-none pr-14 cursor-pointer disabled:opacity-50">
-                  <option *ngFor="let b of data.boxes()" [value]="b.box_number">Box {{ b.box_number }} (Floor {{ b.floor }})</option>
+                  <option *ngFor="let b of boxes()" [value]="b._id">
+                    Box {{ b.boxNumber }} ({{ b.floorName }})
+                    <span *ngIf="!b.isAvailable" class="text-lumina-rust text-[8px] ml-2">(Occupied)</span>
+                    <span *ngIf="b.isAvailable" class="text-lumina-mint text-[8px] ml-2">(Available)</span>
+                  </option>
                 </select>
                 <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-lumina-olive/30 group-focus-within:text-lumina-rust transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
               </div>
+              <!-- Indicateur de chargement -->
+              <div *ngIf="isLoadingBoxes()" class="text-[8px] text-lumina-tan ml-2">Loading boxes...</div>
             </div>
 
             <div class="space-y-3">
@@ -328,6 +348,7 @@ export class ContractsViewComponent implements OnInit {
   view = signal<'list' | 'form' | 'expiring'>('list');
   isLoading = signal(false);
   isSubmitting = signal(false);
+  isLoadingBoxes = signal(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
   showAlerts = signal(false);
@@ -335,6 +356,7 @@ export class ContractsViewComponent implements OnInit {
   // Données avec type étendu
   directory = signal<ExtendedShopProfile[]>([]);
   expiringContracts = signal<ContractEndingSoonResponse[]>([]);
+  boxes = signal<Box[]>([]);
   
   // Filtre
   statusFilter = signal<string>('all');
@@ -354,7 +376,7 @@ export class ContractsViewComponent implements OnInit {
     shopName: '',
     shopType: 1,
     description: '',
-    boxId: 'A-101',
+    boxId: '',  // Sera l'ObjectId MongoDB (ex: "69a5bfd00fc57c1b35cf5089")
     email: '',
     startDate: '',
     duration: 12,
@@ -364,6 +386,7 @@ export class ContractsViewComponent implements OnInit {
   ngOnInit() {
     this.loadShops();
     this.loadExpiringContracts();
+    this.loadBoxes();
   }
 
   loadShops() {
@@ -374,7 +397,7 @@ export class ContractsViewComponent implements OnInit {
         { 
           user_id: 1, 
           id_type: 1, 
-          id_box: 'A-101', 
+          id_box: 'BOX-B6', 
           shop_name: 'Elysian Garments', 
           logo: 'https://api.dicebear.com/7.x/initials/svg?seed=EG', 
           cover_pic: '', 
@@ -385,7 +408,7 @@ export class ContractsViewComponent implements OnInit {
         { 
           user_id: 2, 
           id_type: 3, 
-          id_box: 'C-202', 
+          id_box: 'BOX-C2', 
           shop_name: 'Stellar Gems', 
           logo: 'https://api.dicebear.com/7.x/initials/svg?seed=SG', 
           cover_pic: '', 
@@ -396,6 +419,74 @@ export class ContractsViewComponent implements OnInit {
       ]);
       this.isLoading.set(false);
     }, 500);
+  }
+
+  loadBoxes() {
+    this.isLoadingBoxes.set(true);
+    
+    this.apiService.getConfiguration('boxes').subscribe({
+      next: (response) => {
+        // Si la réponse est directement un tableau
+        if (Array.isArray(response)) {
+          this.boxes.set(response);
+          console.log('Boxes loaded:', response);
+        } 
+        // Si la réponse a une propriété data
+        else if (response?.data && Array.isArray(response.data)) {
+          this.boxes.set(response.data);
+          console.log('Boxes loaded:', response.data);
+        }
+        
+        // Sélectionner la première box disponible par défaut
+        if (this.boxes().length > 0) {
+          const availableBox = this.boxes().find(b => b.isAvailable);
+          if (availableBox) {
+            this.form.boxId = availableBox._id;
+          } else if (this.boxes().length > 0) {
+            this.form.boxId = this.boxes()[0]._id;
+          }
+        }
+        
+        this.isLoadingBoxes.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading boxes:', error);
+        // Fallback sur des données mock en cas d'erreur
+        this.boxes.set([
+          { 
+            _id: '69a5bfd00fc57c1b35cf5089', 
+            boxNumber: 'BOX-B6', 
+            floorId: 'f2',
+            floorName: 'FLOOR-#2',
+            category: 'shop',
+            polygon: [{x: 52.75, y: 19}, {x: 44.5, y: 19}, {x: 44.5, y: 27}, {x: 47, y: 27}, {x: 52.75, y: 27}],
+            surfaceArea: 66,
+            isAvailable: true
+          },
+          { 
+            _id: '79a5bfd00fc57c1b35cf5090', 
+            boxNumber: 'BOX-B7', 
+            floorId: 'f2',
+            floorName: 'FLOOR-#2',
+            category: 'shop',
+            polygon: [{x: 52.75, y: 19}, {x: 44.5, y: 19}, {x: 44.5, y: 27}, {x: 47, y: 27}, {x: 52.75, y: 27}],
+            surfaceArea: 66,
+            isAvailable: true
+          },
+          { 
+            _id: '89a5bfd00fc57c1b35cf5091', 
+            boxNumber: 'BOX-C3', 
+            floorId: 'f3',
+            floorName: 'FLOOR-#3',
+            category: 'shop',
+            polygon: [{x: 52.75, y: 19}, {x: 44.5, y: 19}, {x: 44.5, y: 27}, {x: 47, y: 27}, {x: 52.75, y: 27}],
+            surfaceArea: 66,
+            isAvailable: false
+          }
+        ]);
+        this.isLoadingBoxes.set(false);
+      }
+    });
   }
 
   loadExpiringContracts() {
@@ -416,6 +507,9 @@ export class ContractsViewComponent implements OnInit {
     if (view === 'expiring') {
       this.loadExpiringContracts();
     }
+    if (view === 'form') {
+      this.loadBoxes();
+    }
   }
 
   filterByStatus(event: any) {
@@ -428,12 +522,25 @@ export class ContractsViewComponent implements OnInit {
       this.form.email?.trim() &&
       this.form.startDate &&
       this.form.duration > 0 &&
-      this.form.boxId
+      this.form.boxId // Maintenant c'est un ObjectId valide
     );
   }
 
   createMerchant() {
     if (!this.validateForm()) return;
+
+    // Vérifier que la box sélectionnée existe
+    const selectedBox = this.boxes().find(b => b._id === this.form.boxId);
+    if (!selectedBox) {
+      this.errorMessage.set('Selected box not found');
+      return;
+    }
+
+    // Vérifier que la box est disponible
+    if (!selectedBox.isAvailable) {
+      this.errorMessage.set('Selected box is not available');
+      return;
+    }
 
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
@@ -445,16 +552,16 @@ export class ContractsViewComponent implements OnInit {
       shopType: this.form.shopType.toString(),
       duration: this.form.duration,
       startDate: this.form.startDate,
-      boxId: this.form.boxId
+      boxId: this.form.boxId // Envoie l'ObjectId MongoDB (ex: "69a5bfd00fc57c1b35cf5089")
     }).subscribe({
       next: (response) => {
         console.log('Shop registered successfully:', response);
         
-        // Ajouter le shop à la liste locale
+        // Ajouter le shop à la liste locale en utilisant le boxNumber pour l'affichage
         const newMerchant: ExtendedShopProfile = {
           user_id: Date.now(),
           id_type: Number(this.form.shopType),
-          id_box: this.form.boxId,
+          id_box: selectedBox.boxNumber, // Utiliser boxNumber pour l'affichage
           shop_name: this.form.shopName,
           logo: `https://api.dicebear.com/7.x/initials/svg?seed=${this.form.shopName}`,
           cover_pic: '',
@@ -545,7 +652,7 @@ export class ContractsViewComponent implements OnInit {
       shopName: '',
       shopType: 1,
       description: '',
-      boxId: 'A-101',
+      boxId: '',
       email: '',
       startDate: '',
       duration: 12,

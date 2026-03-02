@@ -34,6 +34,16 @@ export interface RegisterShopRequest {
   boxId: string;
 }
 
+// services/api.service.ts
+export interface BoxResponse {
+  id: string;
+  box_number: string;
+  floor: number;
+  is_available: boolean;
+  surface: number;
+  monthly_rent: number;
+}
+
 export interface ConfigureShopRequest {
   user: string;
   newPassword: string;
@@ -733,7 +743,7 @@ export class ApiService {
    */
   public getConfiguration(tableName: string): Observable<ConfigurationResponse> {
     return this.http.get<ConfigurationResponse>(
-      `${this.apiUrl}/configurations/${tableName}`,
+      `${this.apiUrl}/config/${tableName}`,
       { headers: this.createHeaders() }
     ).pipe(catchError(this.handleError.bind(this)));
   }
