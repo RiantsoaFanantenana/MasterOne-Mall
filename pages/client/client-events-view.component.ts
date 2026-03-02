@@ -38,7 +38,7 @@ interface Discount {
   discountPercentage?: number;
 }
 
-// ==================== MOCK DATA ====================
+// ==================== MOCK DATA COMPLÈTES ====================
 const MOCK_EVENTS: MallEvent[] = [
   { 
     id: 1, 
@@ -208,12 +208,14 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
   standalone: true,
   imports: [CommonModule, FooterComponent, EventItemComponent, DiscountItemComponent, EventDetailsComponent],
   template: `
-    <!-- Debug indicator -->
-    <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black">
-      Auth: {{ authService.isLoggedIn() ? '✅ YES' : '❌ NO' }}
+    <!-- Debug indicator amélioré -->
+    <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black" style="z-index: 9999;">
+      Auth: {{ authService.isLoggedIn() ? '✅' : '❌' }} | 
+      Events: {{ allEvents().length }} | 
+      Tab: {{ activeSubTab() }}
     </div>
     
-    <div class="bg-white min-h-screen flex flex-col motion-slide-in">
+    <div class="bg-white min-h-screen flex flex-col">
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
         <div class="text-center">
@@ -230,12 +232,22 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
         </button>
       </div>
 
-      <main class="flex-1">
+      <!-- Empty State -->
+      <div *ngIf="!isLoading() && allEvents().length === 0 && !selectedEvent()" class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-lumina-olive/30 font-black uppercase tracking-widest">No events available</p>
+          <button (click)="forceUseMockData()" class="mt-4 px-6 py-2 bg-lumina-rust text-white rounded-xl text-[9px] font-black uppercase">
+            Load Mock Data
+          </button>
+        </div>
+      </div>
+
+      <main class="flex-1" *ngIf="allEvents().length > 0 || selectedEvent()">
         
         <!-- List Mode -->
         <ng-container *ngIf="!selectedEvent()">
           <!-- Header Section -->
-          <section class="py-20 px-8 md:px-16 max-w-[1400px] mx-auto text-center reveal-header">
+          <section class="py-20 px-8 md:px-16 max-w-[1400px] mx-auto text-center">
             <h2 class="text-lumina-rust font-black uppercase tracking-[0.5em] text-[10px] mb-4">Mall Highlights</h2>
             <h1 class="text-5xl md:text-7xl font-black font-outfit text-lumina-olive tracking-tighter mb-8 leading-none">
               {{ authService.isLoggedIn() ? 'Your Exclusive Agenda' : 'Events & Exclusive Deals' }}
@@ -267,7 +279,7 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
           </div>
 
           <!-- View Toggle -->
-          <div class="flex justify-center mb-16 px-8 reveal-header">
+          <div class="flex justify-center mb-16 px-8">
             <div class="bg-lumina-cream p-1.5 rounded-2xl flex shadow-inner border border-lumina-olive/5">
               <button 
                 (click)="activeSubTab.set('events')"
@@ -297,6 +309,10 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
                 [eventId]="event.id"
                 [staggerClass]="'stagger-' + (i % 6 + 1)"
               ></app-event-item>
+              
+              <div *ngIf="filteredEvents().length === 0" class="col-span-3 py-24 text-center border-2 border-dashed border-lumina-olive/10 rounded-[40px]">
+                <p class="text-lumina-olive/30 font-black uppercase tracking-widest">No events available</p>
+              </div>
             </div>
 
             <!-- Discounts List -->
@@ -311,7 +327,7 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
                 [staggerClass]="'stagger-' + (i % 6 + 1)"
               ></app-discount-item>
               
-              <div *ngIf="filteredDiscounts().length === 0" class="py-24 text-center border-2 border-dashed border-lumina-olive/10 rounded-[40px] reveal">
+              <div *ngIf="filteredDiscounts().length === 0" class="py-24 text-center border-2 border-dashed border-lumina-olive/10 rounded-[40px]">
                  <p class="text-lumina-olive/30 font-black uppercase tracking-widest">No active discounts currently</p>
               </div>
             </div>
@@ -334,18 +350,6 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
       </main>
       <app-footer></app-footer>
     </div>
-
-    <style>
-      .reveal-header {
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .reveal-header.active {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    </style>
   `
 })
 export class ClientEventsViewComponent implements OnInit, AfterViewInit {
@@ -405,44 +409,65 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
 
   constructor() {
     effect(() => {
+      console.log('🔍 allEvents changed:', this.allEvents().length);
+    });
+
+    effect(() => {
       console.log('Login status changed:', this.authService.isLoggedIn());
     });
   }
 
   ngOnInit() {
+    console.log('🚀 Component initialized');
+    
+    // FORCER L'UTILISATION DES MOCK DATA IMMÉDIATEMENT
+    this.forceUseMockData();
+    
+    // Puis essayer de charger depuis l'API en arrière-plan
     this.loadInitialData();
     
     // Vérifier si un événement est sélectionné dans l'URL
     this.route.params.subscribe(params => {
       const eventId = params['id'];
       if (eventId) {
-        const checkEvent = () => {
+        setTimeout(() => {
           const event = this.allEvents().find(e => e.id === parseInt(eventId));
           if (event) {
             this.selectedEvent.set(event);
-          } else {
-            setTimeout(checkEvent, 100);
           }
-        };
-        checkEvent();
+        }, 200);
       }
     });
   }
 
   ngAfterViewInit() {
-    this.initRevealObserver();
+    // Pas besoin d'observer, on affiche directement
+  }
+
+  // ==================== MÉTHODE FORCÉE POUR UTILISER LES MOCK DATA ====================
+
+  forceUseMockData() {
+    console.log('🔧 FORCING USE OF MOCK DATA');
+    this.allEvents.set([...MOCK_EVENTS]); // Copie pour éviter les références
+    this.allDiscounts.set([...MOCK_DISCOUNTS]);
+    this.allReviews.set([...MOCK_EVENT_REVIEWS]);
+    console.log('✅ Mock data loaded:', this.allEvents().length, 'events');
   }
 
   // Méthode pour formater la plage de dates
   formatEventDateRange(event: MallEvent): string {
-    const start = new Date(event.start_date);
-    const end = new Date(event.end_date);
-    
-    if (start.toDateString() === end.toDateString()) {
-      return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    try {
+      const start = new Date(event.start_date);
+      const end = new Date(event.end_date);
+      
+      if (start.toDateString() === end.toDateString()) {
+        return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+      
+      return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    } catch (e) {
+      return event.start_date;
     }
-    
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   }
 
   navigateToEvent(event: MallEvent) {
@@ -483,7 +508,6 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
       this.loadReviews()
     ]).catch(error => {
       console.error('Error loading initial data:', error);
-      this.errorMessage.set('Failed to load events. Please try again.');
     }).finally(() => {
       this.isLoading.set(false);
     });
@@ -509,18 +533,14 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
               location: e.location
             }));
             
+            // Remplacer les mock data par les données API
             this.allEvents.set(mappedEvents);
-          } else {
-            console.log('API returned empty events array, using mock data');
-            this.allEvents.set(MOCK_EVENTS);
           }
           resolve();
         },
         error: (error) => {
           console.error('Error loading events from API:', error);
-          console.log('FALLBACK: Using mock events data');
-          this.allEvents.set(MOCK_EVENTS);
-          resolve();
+          resolve(); // On garde les mock data déjà chargées
         }
       });
     });
@@ -528,39 +548,16 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
 
   private loadDiscounts(): Promise<void> {
     return new Promise((resolve) => {
-      // API des coupons pas encore disponible, on utilise directement les mock data
-      console.log('Using mock discounts data');
-      this.allDiscounts.set(MOCK_DISCOUNTS);
+      // API pas disponible, on garde les mock data
       resolve();
     });
   }
 
   private loadReviews(): Promise<void> {
     return new Promise((resolve) => {
-      // API des reviews d'événements pas encore disponible, on utilise les mock data
-      console.log('Using mock event reviews data');
-      this.allReviews.set(MOCK_EVENT_REVIEWS);
+      // API pas disponible, on garde les mock data
       resolve();
     });
-  }
-
-  private getDiscountStatus(validUntil: string): string {
-    const today = new Date();
-    const endDate = new Date(validUntil);
-    
-    if (endDate < today) {
-      return 'Expired';
-    }
-    
-    const daysUntilEnd = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysUntilEnd <= 3) {
-      return 'Flash Sale';
-    } else if (daysUntilEnd <= 7) {
-      return 'Active Deal';
-    } else {
-      return 'Upcoming';
-    }
   }
 
   getEventImage(id: number) {
@@ -584,33 +581,12 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
     if (!event) return;
     
     this.allReviews.update(reviews => [newReview, ...reviews]);
-    
-    setTimeout(() => {
-      const reviewList = document.querySelector('app-event-reviews-list');
-      if (reviewList) {
-        reviewList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
   }
 
   // ==================== UTILITAIRES ====================
 
   retryLoading() {
+    this.forceUseMockData();
     this.loadInitialData();
-  }
-
-  private initRevealObserver() {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
-      });
-    }, { threshold: 0.1 });
-
-    setTimeout(() => {
-      const reveals = this.el.nativeElement.querySelectorAll('.reveal, .reveal-header');
-      reveals.forEach((r: HTMLElement) => observer.observe(r));
-    }, 100);
   }
 }
