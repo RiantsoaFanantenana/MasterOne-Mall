@@ -1,6 +1,6 @@
 
 import { Injectable, signal, computed } from '@angular/core';
-import { Box, ShopType, SubscriptionType, ShopProfile, MallEvent, Discount, Coupon, BoxTicket, Subscription, ChatConversation } from '../types.ts';
+import { Box, ShopType, SubscriptionType, ShopProfile, MallEvent, Discount, Coupon, BoxTicket, Subscription, ChatConversation } from '../types';
 
 @Injectable({
   providedIn: 'root'

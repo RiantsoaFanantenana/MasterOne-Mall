@@ -1,8 +1,8 @@
 
 import { Component, AfterViewInit, ElementRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FooterComponent } from './components/footer.component.ts';
-import { CouponItemComponent } from './components/coupon-item.component.ts';
+import { FooterComponent } from './components/footer.component';
+import { CouponItemComponent } from './components/coupon-item.component';
 
 interface Coupon {
   id: string;

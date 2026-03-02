@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatConversation } from '../../../types.ts';
+import { ChatConversation } from '../../../types';
 
 @Component({
   selector: 'app-shop-chat-room',

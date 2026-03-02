@@ -7,7 +7,7 @@ export const analyzeContent = async (prompt: string) => {
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         temperature: 0.7,
@@ -31,7 +31,7 @@ export const getSmartSuggestions = async (context: string) => {
   
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.5-flash",
       contents: `Generate 3 smart action suggestions based on this context: ${context}`,
       config: {
         responseMimeType: "application/json",

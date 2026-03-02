@@ -1,7 +1,7 @@
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Box } from '../../../types.ts';
+import { Box } from '../../../types';
 
 @Component({
   selector: '[app-box-row]',

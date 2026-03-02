@@ -1,7 +1,9 @@
-
-import { Component, Output, EventEmitter, Input, signal, inject } from '@angular/core';
+// pages/client/components/client-navbar.component.ts
+import { Component, Output, EventEmitter, Input, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MasterDataService } from '../../services/master-data.service.ts';
+import { Router } from '@angular/router';
+import { MasterDataService } from '../../services/master-data.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-client-navbar',
@@ -9,6 +11,7 @@ import { MasterDataService } from '../../services/master-data.service.ts';
   imports: [CommonModule],
   template: `
     <div class="w-full flex flex-col sticky top-0 z-50">
+      <!-- Top bar with login status -->
       <div class="bg-lumina-olive text-white/80 py-2.5 px-6 md:px-16 flex justify-between items-center text-[9px] md:text-[10px] font-bold uppercase tracking-widest border-b border-white/5 overflow-hidden">
         <div class="flex gap-4 md:gap-6">
           <span class="flex items-center gap-2 truncate max-w-[150px] md:max-w-none">
@@ -23,11 +26,12 @@ import { MasterDataService } from '../../services/master-data.service.ts';
         <div class="flex items-center gap-4">
            <span *ngIf="isLoggedIn" class="text-lumina-mint flex items-center gap-1.5">
              <span class="w-1.5 h-1.5 rounded-full bg-lumina-mint animate-pulse"></span>
-             VIP Session Active
+             {{ getUserDisplayName() }}
            </span>
         </div>
       </div>
 
+      <!-- Main navigation -->
       <nav class="h-20 bg-white/95 backdrop-blur-xl shadow-sm border-b border-lumina-olive/5 px-6 md:px-16 flex items-center justify-between">
         <div class="flex items-center gap-3 cursor-pointer group" (click)="navigateTo('client')">
           <div class="bg-lumina-rust p-1.5 rounded-lg group-hover:rotate-12 transition-transform shadow-lg">
@@ -36,6 +40,7 @@ import { MasterDataService } from '../../services/master-data.service.ts';
           <span class="text-xl md:text-2xl font-black font-outfit tracking-tighter text-lumina-olive uppercase">MasterOne</span>
         </div>
 
+        <!-- Desktop navigation -->
         <div class="hidden lg:flex items-center gap-8 xl:gap-10 h-full">
           <button 
             *ngFor="let nav of navItems"
@@ -47,19 +52,22 @@ import { MasterDataService } from '../../services/master-data.service.ts';
           </button>
         </div>
 
+        <!-- Right side actions -->
         <div class="flex items-center gap-3 md:gap-4">
           <button (click)="navigateTo('chat')" [ngClass]="activeTab === 'chat' ? 'bg-lumina-rust text-white shadow-lg' : 'bg-lumina-olive/5 text-lumina-olive'" class="p-2.5 rounded-xl transition-all shadow-sm">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </button>
           
           <ng-container *ngIf="!isLoggedIn">
-            <button (click)="onLoginRequest.emit()" class="hidden sm:block px-6 py-3 bg-lumina-olive text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-lumina-rust transition-all shadow-md active:scale-95">Login</button>
+            <button (click)="onLoginRequest.emit()" class="hidden sm:block px-6 py-3 bg-lumina-olive text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-lumina-rust transition-all shadow-md active:scale-95">
+              Member Access
+            </button>
           </ng-container>
           
           <ng-container *ngIf="isLoggedIn">
             <button (click)="logout.emit()" class="hidden sm:flex items-center gap-2 px-6 py-3 bg-lumina-rust text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-lumina-olive transition-all shadow-md active:scale-95">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Logout
+              Exit
             </button>
           </ng-container>
           
@@ -92,12 +100,12 @@ import { MasterDataService } from '../../services/master-data.service.ts';
         </div>
 
         <div class="mt-auto py-10 border-t border-white/10">
-          <button *ngIf="!isLoggedIn" (click)="onLoginRequest.emit()" class="w-full py-6 bg-white text-lumina-dark rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl">
-            VIP Access
+          <button *ngIf="!isLoggedIn" (click)="onLoginRequest.emit(); isMenuOpen.set(false)" class="w-full py-6 bg-white text-lumina-dark rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl">
+            Member Access
           </button>
           <button *ngIf="isLoggedIn" (click)="logout.emit(); isMenuOpen.set(false)" class="w-full py-6 bg-lumina-rust text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl flex items-center justify-center gap-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Deauthorize Session
+            Exit Session
           </button>
         </div>
       </div>
@@ -111,7 +119,10 @@ export class ClientNavbarComponent {
   @Output() onLoginRequest = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
   
+  private apiService = inject(ApiService);
+  private router = inject(Router);
   public data = inject(MasterDataService);
+  
   isMenuOpen = signal(false);
 
   navItems = [
@@ -119,10 +130,18 @@ export class ClientNavbarComponent {
     { id: 'client-shops', label: 'Boutiques' },
     { id: 'client-events', label: 'Agenda' },
     { id: 'client-services', label: 'Services' },
-    { id: 'client-wallet', label: 'My Wallet' }
+    { id: 'client-wallet', label: 'Wallet' }
   ];
 
-  toggleMobileMenu() { this.isMenuOpen.update(v => !v); }
+  getUserDisplayName(): string {
+    const userEmail = this.apiService.getUserId(); // Ou autre méthode pour obtenir l'email
+    return userEmail ? userEmail.split('@')[0] : 'VIP Member';
+  }
+
+  toggleMobileMenu() { 
+    this.isMenuOpen.update(v => !v); 
+  }
+  
   navigateTo(tab: string) {
     if (tab === 'client-wallet' && !this.isLoggedIn) {
       this.onLoginRequest.emit();

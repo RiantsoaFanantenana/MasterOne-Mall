@@ -1,211 +1,158 @@
-
-import { Component, signal, effect, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { GeminiService } from './services/gemini.service.ts';
-import { Message } from './types.ts';
-import { SidebarComponent } from './components/sidebar.component.ts';
-import { HeaderComponent } from './components/header.component.ts';
-import { ClientNavbarComponent } from './pages/client/client-navbar.component.ts';
-import { MallViewComponent } from './pages/mall/mall-view.component.ts';
-import { ShopViewComponent } from './pages/shop/shop-view.component.ts';
-import { ClientViewComponent } from './pages/client/client-view.component.ts';
-import { ClientShopsViewComponent } from './pages/client/client-shops-view.component.ts';
-import { ClientServicesViewComponent } from './pages/client/client-services-view.component.ts';
-import { ClientEventsViewComponent } from './pages/client/client-events-view.component.ts';
-import { ClientWalletViewComponent } from './pages/client/client-wallet-view.component.ts';
-import { ChatComponent } from './components/chat.component.ts';
-import { ShopDirectChatComponent } from './pages/client/components/shop-direct-chat.component.ts';
-import { LoginModalComponent, UserRole } from './components/login-modal.component.ts';
+import { RouterOutlet, Router } from '@angular/router';
+import { SidebarComponent } from './components/sidebar.component';
+import { HeaderComponent } from './components/header.component';
+import { ClientNavbarComponent } from './pages/client/client-navbar.component';
+import { LoginModalComponent, UserRole } from './components/login-modal.component';
+import { ApiService } from './services/api.service'; // Changé de AuthService à ApiService
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule,
-    SidebarComponent, 
-    HeaderComponent, 
+    CommonModule,
+    RouterOutlet,
+    SidebarComponent,
+    HeaderComponent,
     ClientNavbarComponent,
-    MallViewComponent,
-    ShopViewComponent,
-    ClientViewComponent,
-    ClientShopsViewComponent,
-    ClientServicesViewComponent,
-    ClientEventsViewComponent,
-    ClientWalletViewComponent,
-    ChatComponent,
-    ShopDirectChatComponent,
     LoginModalComponent
   ],
   template: `
     <div [ngClass]="isClientMode() ? 'flex flex-col' : 'flex flex-row'" class="h-screen w-full overflow-hidden bg-lumina-cream font-jakarta">
       
       <app-sidebar 
-        *ngIf="!isClientMode() && isLoggedIn()"
-        [mode]="loginRole === 'mall' ? 'admin' : 'shop'"
-        [activeTab]="activeTab()" 
+        *ngIf="!isClientMode() && apiService.isAuthenticated()"
+        [mode]="getSidebarMode()"
+        [activeTab]="currentTab"
         [isOpen]="isSidebarOpen()"
-        (tabChange)="handleTabChange($event)"
+        (tabChange)="navigateTo($event)"
         (logout)="logout()"
         (close)="isSidebarOpen.set(false)"
       ></app-sidebar>
 
       <app-client-navbar 
         *ngIf="isClientMode()"
-        [activeTab]="activeTab()"
-        [isLoggedIn]="isLoggedIn()"
-        (tabChange)="handleTabChange($event)"
+        [activeTab]="currentTab"
+        [isLoggedIn]="apiService.isAuthenticated()"
+        (tabChange)="navigateTo($event)"
         (onLoginRequest)="showLogin.set(true)"
         (logout)="logout()"
       ></app-client-navbar>
 
       <main class="flex-1 flex flex-col min-h-0 bg-lumina-cream relative overflow-hidden">
         <app-header 
-          *ngIf="!isClientMode() && isLoggedIn()"
+          *ngIf="!isClientMode() && apiService.isAuthenticated()"
           (toggleSidebar)="isSidebarOpen.set(!isSidebarOpen())"
         ></app-header>
 
         <div class="flex-1 overflow-y-auto custom-main-scroll relative h-full" id="main-scroll-container">
-          
-          <!-- New Independent Auth Modal -->
-          <app-login-modal
-            [isVisible]="showLogin()"
-            (login)="onLogin($event)"
-            (close)="showLogin.set(false)"
-          ></app-login-modal>
-
-          <!-- Content Switcher -->
-          <div [ngClass]="isClientMode() ? 'w-full' : 'max-w-[1920px] mx-auto w-full p-6 md:p-12 lg:p-16'">
-            
-            <!-- ADMIN VIEW -->
-            <app-mall-view 
-              *ngIf="isAdminTab()"
-              [activeModule]="activeTab()"
-              [stats]="mallStats"
-              [trafficData]="trafficData"
-              [suggestions]="mallSuggestions()"
-              [loading]="loadingSuggestions()"
-              (onRefresh)="fetchMallSuggestions()"
-            ></app-mall-view>
-
-            <!-- SHOP VIEW -->
-            <app-shop-view 
-              *ngIf="isShopTab()"
-              [activeModule]="activeTab()"
-            ></app-shop-view>
-
-            <!-- CLIENT VIEWS -->
-            <app-client-view 
-              *ngIf="activeTab() === 'client'"
-              (onTabRequest)="handleTabChange($event)"
-            ></app-client-view>
-            <app-client-shops-view *ngIf="activeTab() === 'client-shops'" [isLoggedIn]="isLoggedIn()"></app-client-shops-view>
-            <app-client-services-view *ngIf="activeTab() === 'client-services'" [isLoggedIn]="isLoggedIn()"></app-client-services-view>
-            <app-client-events-view *ngIf="activeTab() === 'client-events'"></app-client-events-view>
-            <app-client-wallet-view *ngIf="activeTab() === 'client-wallet'"></app-client-wallet-view>
-
-            <!-- SHARED AI ASSISTANT -->
-            <div *ngIf="activeTab() === 'ai-assistant' || (activeTab() === 'chat' && !isLoggedIn())" [ngClass]="isClientMode() ? 'p-6 md:p-16 max-w-5xl mx-auto' : ''">
-              <app-chat [messages]="messages()" [isTyping]="isTyping()" (sendMessage)="handleSendMessage($event)" (clearChat)="messages.set([])"></app-chat>
-            </div>
-          </div>
+          <router-outlet></router-outlet>
         </div>
-
-        <!-- Global Direct Chat Overlay for Clients -->
-        <app-shop-direct-chat *ngIf="isLoggedIn() && isClientMode()"></app-shop-direct-chat>
       </main>
     </div>
+
+    <!-- Login Modal -->
+    <app-login-modal
+      [isVisible]="showLogin()"
+      (login)="onLogin($event)"
+      (close)="showLogin.set(false)"
+    ></app-login-modal>
   `
 })
 export class AppComponent {
-  private gemini = inject(GeminiService);
-  activeTab = signal('client');
-  isLoggedIn = signal(false);
-  showLogin = signal(false);
+  private router = inject(Router);
+  apiService = inject(ApiService); // Changé de AuthService à ApiService
+  
   isSidebarOpen = signal(false);
-  loginRole: UserRole = 'client'; 
-  isTyping = signal(false);
-  messages = signal<Message[]>([]);
-  mallSuggestions = signal<any[]>([]);
-  loadingSuggestions = signal(false);
-
-  isClientMode() {
-    const publicTabs = ['client', 'client-shops', 'client-services', 'client-events', 'client-wallet'];
-    return publicTabs.includes(this.activeTab()) || (this.activeTab() === 'chat' && !this.isLoggedIn());
+  showLogin = signal(false);
+  
+  get currentTab(): string {
+    const url = this.router.url;
+    if (url.startsWith('/admin')) {
+      const module = url.split('/')[2] || 'dashboard';
+      return module === 'dashboard' ? 'mall' : module;
+    }
+    if (url.startsWith('/shop')) {
+      const module = url.split('/')[2] || 'dashboard';
+      if (module === 'dashboard') return 'shop';
+      return `shop-${module}`;
+    }
+    if (url.startsWith('/client')) {
+      const module = url.split('/')[2] || '';
+      if (module === 'shops') return 'client-shops';
+      if (module === 'services') return 'client-services';
+      if (module === 'events') return 'client-events';
+      if (module === 'wallet') return 'client-wallet';
+      return 'client';
+    }
+    if (url.startsWith('/chat')) return 'chat';
+    return 'client';
   }
 
-  isAdminTab() {
-    return ['mall', 'finance', 'contracts', 'maintenance', 'infrastructure'].includes(this.activeTab());
+  getSidebarMode(): 'admin' | 'shop' {
+    const role = this.apiService.getUserRole();
+    return role === 'admin' ? 'admin' : 'shop';
   }
 
-  isShopTab() {
-    return ['shop', 'shop-profile', 'shop-events', 'shop-discounts', 'shop-coupons', 'shop-maintenance', 'shop-subscription', 'shop-chat'].includes(this.activeTab());
+  isClientMode(): boolean {
+    return !this.router.url.startsWith('/admin') && 
+           !this.router.url.startsWith('/shop');
   }
 
-  handleTabChange(tab: string) {
-    this.activeTab.set(tab);
-    this.isSidebarOpen.set(false);
-    // Ensure scroll resets when changing tabs
-    const container = document.getElementById('main-scroll-container');
-    if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+  navigateTo(tab: string) {
+    const routes: Record<string, string> = {
+      // Client routes
+      'client': '/client',
+      'client-shops': '/client/shops',
+      'client-services': '/client/services',
+      'client-events': '/client/events',
+      'client-wallet': '/client/wallet',
+      
+      // Admin routes
+      'mall': '/admin/dashboard',
+      'infrastructure': '/admin/infrastructure',
+      'finance': '/admin/finance',
+      'contracts': '/admin/contracts',
+      'maintenance': '/admin/maintenance',
+      
+      // Shop routes
+      'shop': '/shop/dashboard',
+      'shop-profile': '/shop/profile',
+      'shop-events': '/shop/events',
+      'shop-discounts': '/shop/discounts',
+      'shop-coupons': '/shop/coupons',
+      'shop-maintenance': '/shop/maintenance',
+      'shop-subscription': '/shop/subscription',
+      'shop-chat': '/shop/chat',
+      
+      // Shared
+      'ai-assistant': '/admin/ai-assistant',
+      'chat': '/chat'
+    };
+
+    this.router.navigateByUrl(routes[tab] || '/client');
   }
 
-  onLogin(event: { role: UserRole, username: string }) {
-    this.loginRole = event.role;
-    this.isLoggedIn.set(true);
+  onLogin(event: { role: UserRole, username: string, email: string }) {
+    console.log('Login event:', event);
+    
+    // Note: Le login est déjà géré par ApiService dans le modal
+    // On ferme juste le modal et on redirige
     this.showLogin.set(false);
-    this.activeTab.set(this.loginRole === 'mall' ? 'mall' : (this.loginRole === 'shop' ? 'shop' : 'client-wallet'));
+    
+    // Rediriger selon le rôle
+    if (event.role === 'admin') {
+      this.router.navigateByUrl('/admin/dashboard');
+    } else if (event.role === 'shop') {
+      this.router.navigateByUrl('/shop/dashboard');
+    } else {
+      this.router.navigateByUrl('/client/wallet');
+    }
   }
 
   logout() {
-    this.isLoggedIn.set(false);
-    this.activeTab.set('client');
-  }
-
-  mallStats = [
-    { label: 'Visits Today', value: '14.8k', trend: 15.4, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>' },
-    { label: 'Active Houses', value: '184', trend: 0.5, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/></svg>' },
-    { label: 'Yield Efficiency', value: '94%', trend: 2.1, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' },
-    { label: 'Rev Projected', value: '128.4k€', trend: 4.8, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>' },
-  ];
-
-  trafficData = [
-    { name: 'Mon', value: 55 }, { name: 'Tue', value: 48 }, { name: 'Wed', value: 72 },
-    { name: 'Thu', value: 64 }, { name: 'Fri', value: 88 }, { name: 'Sat', value: 95 },
-    { name: 'Sun', value: 42 },
-  ];
-
-  constructor() {
-    effect(() => {
-      if (this.isAdminTab() && this.mallSuggestions().length === 0 && !this.loadingSuggestions()) {
-        this.fetchMallSuggestions();
-      }
-    });
-  }
-
-  async fetchMallSuggestions() {
-    this.loadingSuggestions.set(true);
-    try {
-      const result = await this.gemini.getSmartSuggestions('Context: Paris Mall 2024 optimization.');
-      this.mallSuggestions.set(result);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.loadingSuggestions.set(false);
-    }
-  }
-
-  async handleSendMessage(content: string) {
-    const userMsg: Message = { id: Math.random().toString(), role: 'user', content, timestamp: Date.now() };
-    this.messages.update(prev => [...prev, userMsg]);
-    this.isTyping.set(true);
-    try {
-      const response = await this.gemini.analyzeContent(content);
-      const aiMsg: Message = { id: Math.random().toString(), role: 'assistant', content: response, timestamp: Date.now() };
-      this.messages.update(prev => [...prev, aiMsg]);
-    } finally {
-      this.isTyping.set(false);
-    }
+    this.apiService.logout(); // Utilise ApiService pour la déconnexion
+    this.router.navigateByUrl('/client');
   }
 }
