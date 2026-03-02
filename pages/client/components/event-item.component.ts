@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-3xl border border-lumina-olive/5 overflow-hidden shadow-sm hover:shadow-xl transition-all group cursor-pointer"
+    <div class="bg-white rounded-3xl border border-lumina-olive/5 overflow-hidden shadow-sm hover:shadow-xl group cursor-pointer"
          [ngClass]="staggerClass"
          (click)="navigateToEvent()">
       <div class="h-64 overflow-hidden relative">
