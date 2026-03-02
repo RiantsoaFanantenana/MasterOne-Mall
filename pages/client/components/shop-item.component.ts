@@ -1,4 +1,3 @@
-
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -7,8 +6,9 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer shadow-xl reveal motion-item"
-         [ngClass]="staggerClass">
+    <div class="group relative h-[500px] rounded-2xl overflow-hidden cursor-pointer shadow-xl"
+         [ngClass]="staggerClass"
+         (click)="select.emit()">
       
       <!-- Favorite Button -->
       <button *ngIf="isLoggedIn" 
@@ -42,17 +42,11 @@ import { CommonModule } from '@angular/common';
           {{ description }}
         </p>
         
-        <button (click)="select.emit(); $event.stopPropagation()" class="text-white text-[10px] font-black uppercase tracking-widest border-b border-white/30 pb-1 hover:border-white transition-all">
+        <button class="text-white text-[10px] font-black uppercase tracking-widest border-b border-white/30 pb-1 hover:border-white transition-all">
           Visit Store
         </button>
       </div>
     </div>
-
-    <style>
-      .motion-item {
-        transition: transform 4.5s cubic-bezier(0.15, 1, 0.3, 1), opacity 3.5s ease !important;
-      }
-    </style>
   `
 })
 export class ShopItemComponent {

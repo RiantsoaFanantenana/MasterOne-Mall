@@ -1,5 +1,5 @@
 // pages/client/client-events-view.component.ts
-import { Component, AfterViewInit, ElementRef, inject, signal, computed, effect, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FooterComponent } from './components/footer.component';
@@ -208,13 +208,6 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
   standalone: true,
   imports: [CommonModule, FooterComponent, EventItemComponent, DiscountItemComponent, EventDetailsComponent],
   template: `
-    <!-- Debug indicator amélioré -->
-    <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black" style="z-index: 9999;">
-      Auth: {{ authService.isLoggedIn() ? '✅' : '❌' }} | 
-      Events: {{ allEvents().length }} | 
-      Tab: {{ activeSubTab() }}
-    </div>
-    
     <div class="bg-white min-h-screen flex flex-col">
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -265,7 +258,12 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
             <div class="bg-lumina-rust/10 border border-lumina-rust/20 p-6 rounded-3xl flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-lumina-rust rounded-2xl flex items-center justify-center text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
                 </div>
                 <div>
                   <h3 class="font-black text-lumina-olive text-sm">{{ memberEvents().length }} Member-Exclusive Events</h3>
@@ -350,12 +348,25 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
       </main>
       <app-footer></app-footer>
     </div>
+
+    <!-- Styles forcés pour s'assurer que le texte est visible -->
+    <style>
+      app-event-item, app-discount-item {
+        display: block;
+        color: #2d2d2d;
+      }
+      .text-lumina-olive { color: #4a5d4a; }
+      .text-lumina-rust { color: #b85c4a; }
+      .text-lumina-tan { color: #c4a48c; }
+      .bg-lumina-cream { background-color: #f8f4e9; }
+      .bg-lumina-rust { background-color: #b85c4a; }
+      .border-lumina-rust { border-color: #b85c4a; }
+      .border-lumina-olive { border-color: #4a5d4a; }
+    </style>
   `
 })
-export class ClientEventsViewComponent implements OnInit, AfterViewInit {
-  private el = inject(ElementRef);
+export class ClientEventsViewComponent implements OnInit {
   private apiService = inject(ApiService);
-  private data = inject(MasterDataService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   public authService = inject(AuthService);
@@ -407,19 +418,7 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
     return this.allReviews().filter(r => r.event_id === event.id);
   });
 
-  constructor() {
-    effect(() => {
-      console.log('🔍 allEvents changed:', this.allEvents().length);
-    });
-
-    effect(() => {
-      console.log('Login status changed:', this.authService.isLoggedIn());
-    });
-  }
-
   ngOnInit() {
-    console.log('🚀 Component initialized');
-    
     // FORCER L'UTILISATION DES MOCK DATA IMMÉDIATEMENT
     this.forceUseMockData();
     
@@ -440,18 +439,12 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    // Pas besoin d'observer, on affiche directement
-  }
-
   // ==================== MÉTHODE FORCÉE POUR UTILISER LES MOCK DATA ====================
 
   forceUseMockData() {
-    console.log('🔧 FORCING USE OF MOCK DATA');
-    this.allEvents.set([...MOCK_EVENTS]); // Copie pour éviter les références
+    this.allEvents.set([...MOCK_EVENTS]);
     this.allDiscounts.set([...MOCK_DISCOUNTS]);
     this.allReviews.set([...MOCK_EVENT_REVIEWS]);
-    console.log('✅ Mock data loaded:', this.allEvents().length, 'events');
   }
 
   // Méthode pour formater la plage de dates
@@ -485,7 +478,6 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
       this.handleLoginRequest();
       return;
     }
-    console.log('Booking event:', event);
   }
 
   handleRegisterForEvent(event: any) {
@@ -493,7 +485,6 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
       this.handleLoginRequest();
       return;
     }
-    console.log('Registering for event:', event);
   }
 
   // ==================== CHARGEMENT DES DONNÉES ====================
@@ -518,8 +509,6 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
       this.apiService.getAllEvents().subscribe({
         next: (events: EventResponse[]) => {
           if (events && events.length > 0) {
-            console.log('Events loaded from API:', events);
-            
             const mappedEvents: MallEvent[] = events.map(e => ({
               id: e.id,
               shop_id: e.shopId.toString(),
@@ -533,14 +522,13 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
               location: e.location
             }));
             
-            // Remplacer les mock data par les données API
             this.allEvents.set(mappedEvents);
           }
           resolve();
         },
         error: (error) => {
           console.error('Error loading events from API:', error);
-          resolve(); // On garde les mock data déjà chargées
+          resolve();
         }
       });
     });
@@ -548,14 +536,12 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
 
   private loadDiscounts(): Promise<void> {
     return new Promise((resolve) => {
-      // API pas disponible, on garde les mock data
       resolve();
     });
   }
 
   private loadReviews(): Promise<void> {
     return new Promise((resolve) => {
-      // API pas disponible, on garde les mock data
       resolve();
     });
   }
@@ -575,8 +561,6 @@ export class ClientEventsViewComponent implements OnInit, AfterViewInit {
   // ==================== GESTION DES REVIEWS ====================
 
   addReviewToEvent(newReview: EventReview) {
-    console.log('Adding review to event:', newReview);
-    
     const event = this.selectedEvent();
     if (!event) return;
     

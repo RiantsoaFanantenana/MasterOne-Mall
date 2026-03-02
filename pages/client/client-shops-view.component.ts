@@ -1,19 +1,31 @@
 // pages/client/client-shops-view.component.ts
 import { Component, AfterViewInit, ElementRef, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ShopListComponent } from './components/shop-list.component';
 import { ShopType, ShopProfile } from '../../types';
 import { ShopDetailsComponent, ShopReview } from './components/shop-details.component';
 import { FooterComponent } from './components/footer.component';
 import { MasterDataService } from '../../services/master-data.service';
 import { ApiService, SearchShopsResponse, ShopProfileResponse, EventResponse, ReviewResponse } from '../../services/api.service';
-import { AuthService } from '../../services/auth.service'; // ← IMPORT AJOUTÉ
-import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+
+// ==================== INTERFACES ADAPTÉES ====================
+interface ApiShop extends SearchShopsResponse {
+  // Extension si nécessaire
+}
+
+interface ApiEvent extends EventResponse {
+  // Pour adapter les événements
+}
+
+interface ApiReview extends ReviewResponse {
+  // Pour adapter les reviews
+}
 
 // ==================== MOCK DATA (fallback quand API échoue) ====================
 const MOCK_SHOP_TYPES: ShopType[] = [
-  { id: 1, type_name: 'Fashion & Luxury' },
+  { id: 1, type_name: 'Luxury Fashion' },
   { id: 2, type_name: 'Jewelry' },
   { id: 3, type_name: 'Gastronomy' },
   { id: 4, type_name: 'Beauty' }
@@ -69,12 +81,12 @@ const MOCK_REVIEWS: ShopReview[] = [
 ];
 
 const MOCK_EVENTS = [
-  { id: 101, shop_id: 10, title: 'Winter Gala Night', description: 'Exclusive unveiling of the midnight collection.', start_date: '2024-12-01', end_date: '2024-12-02', is_public: false, created_at: '2024-11-01', status: 'published' },
-  { id: 102, shop_id: 10, title: 'Designer Workshop', description: 'Learn the art of drape with our head designer.', start_date: '2024-12-15', end_date: '2024-12-15', is_public: true, created_at: '2024-11-05', status: 'published' }
+  { id: 101, shop_id: 10, title: 'Winter Gala Night', description: 'Exclusive unveiling of the midnight collection.', eventDate: '2024-12-01', isPublic: false, status: 'published' },
+  { id: 102, shop_id: 10, title: 'Designer Workshop', description: 'Learn the art of drape with our head designer.', eventDate: '2024-12-15', isPublic: true, status: 'published' }
 ];
 
 const MOCK_DISCOUNTS = [
-  { id: 201, shop_id: 10, title: 'Lumina Welcome', description: 'Special first-purchase offer for members.', value: '15%', start_date: '2024-11-01', end_date: '2024-12-31', status: 'active', created_at: '2024-10-25' }
+  { id: 201, shop_id: 10, title: 'Lumina Welcome', description: 'Special first-purchase offer for members.', discountPercentage: 15, validUntil: '2024-12-31', status: 'active' }
 ];
 
 @Component({
@@ -82,7 +94,7 @@ const MOCK_DISCOUNTS = [
   standalone: true,
   imports: [CommonModule, ShopListComponent, ShopDetailsComponent, FooterComponent],
   template: `
-    <!-- Debug indicator (à retirer plus tard) -->
+    <!-- Debug indicator -->
     <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black">
       Auth: {{ authService.isLoggedIn() ? '✅ YES' : '❌ NO' }}
     </div>
@@ -144,9 +156,10 @@ const MOCK_DISCOUNTS = [
 export class ClientShopsViewComponent implements OnInit, AfterViewInit {
   private el = inject(ElementRef);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private apiService = inject(ApiService);
   private data = inject(MasterDataService);
-  public authService = inject(AuthService); // ← Injection du service d'auth
+  public authService = inject(AuthService);
   
   // États
   selectedShop = signal<ShopProfile | null>(null);
@@ -171,13 +184,25 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
   selectedShopEvents = computed(() => {
     const shop = this.selectedShop();
     if (!shop) return [];
-    return this.shopsEvents().get(shop.user_id) || [];
+    const events = this.shopsEvents().get(shop.user_id) || [];
+    // Adapter les événements pour l'affichage
+    return events.map(e => ({
+      ...e,
+      start_date: e.eventDate || e.start_date,
+      end_date: e.eventDate || e.end_date || e.start_date
+    }));
   });
 
   selectedShopDiscounts = computed(() => {
     const shop = this.selectedShop();
     if (!shop) return [];
-    return this.shopsDiscounts().get(shop.user_id) || [];
+    const discounts = this.shopsDiscounts().get(shop.user_id) || [];
+    // Adapter les discounts pour l'affichage
+    return discounts.map(d => ({
+      ...d,
+      value: d.discountPercentage ? d.discountPercentage + '%' : d.value,
+      end_date: d.validUntil || d.end_date
+    }));
   });
 
   // Shops filtrés
@@ -189,7 +214,7 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
     if (query) {
       shops = shops.filter(s => 
         s.shop_name.toLowerCase().includes(query) || 
-        s.description.toLowerCase().includes(query)
+        (s.description || '').toLowerCase().includes(query)
       );
     }
     
@@ -204,56 +229,93 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
   reviewsForSelectedShop = computed(() => {
     const shop = this.selectedShop();
     if (!shop) return [];
-    return this.allReviews().filter(r => r.shop_id === shop.id_box);
+    return this.allReviews().filter(r => r.shop_id === shop.id_box || r.shop_id === shop.user_id.toString());
   });
 
   constructor() {
-    // Effet pour charger les données quand l'utilisateur se connecte
     effect(() => {
       if (this.authService.isLoggedIn()) {
         console.log('User logged in, loading favorites and wallet...');
         this.loadFavorites();
         this.loadWallet();
       } else {
-        // Réinitialiser les favoris quand l'utilisateur se déconnecte
         this.favorites.set(new Set());
       }
     });
   }
 
-  // Ajouter dans les injections
-private route = inject(ActivatedRoute);
-
-ngOnInit() {
-  this.loadInitialData();
-  
-  // Vérifier si un shop est sélectionné dans l'URL (paramètre de route)
-  this.route.params.subscribe(params => {
-    const shopId = params['id'];
-    if (shopId) {
-      this.loadShopById(parseInt(shopId));
-    } else {
-      // Sinon, vérifier les query params (pour compatibilité)
-      const queryParams = new URLSearchParams(window.location.search);
-      const queryShopId = queryParams.get('shopId');
-      if (queryShopId) {
-        this.loadShopById(parseInt(queryShopId));
+  ngOnInit() {
+    this.loadInitialData();
+    
+    // Vérifier si un shop est sélectionné dans l'URL
+    this.route.params.subscribe(params => {
+      const shopId = params['id'];
+      if (shopId) {
+        this.loadShopById(parseInt(shopId));
       }
-    }
-  });
-}
-
-// Mettre à jour updateUrlWithShop pour utiliser les paramètres de route
-private updateUrlWithShop(shop: ShopProfile | null) {
-  if (shop) {
-    this.router.navigate(['/client/shop', shop.user_id]);
-  } else {
-    this.router.navigate(['/client/shops']);
+    });
   }
-}
 
   ngAfterViewInit() {
     this.initRevealObserver();
+  }
+
+  // ==================== MÉTHODES DE FORMATAGE ====================
+
+  private formatShopFromApi(apiShop: SearchShopsResponse): ShopProfile {
+    return {
+      user_id: apiShop.id,
+      id_type: this.getShopTypeId(apiShop.shopType) || 1,
+      id_box: apiShop.box || 'BOX-00',
+      shop_name: apiShop.shopName,
+      logo: apiShop.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${apiShop.shopName}`,
+      cover_pic: '',
+      description: apiShop.description || 'Luxury boutique at MasterOne Mall',
+      subscription_status: this.determineSubscriptionStatus(apiShop)
+    };
+  }
+
+  private formatReviewFromApi(apiReview: ReviewResponse, shopId: number): ShopReview {
+    return {
+      id: apiReview.id,
+      create_at: apiReview.date,
+      shop_id: shopId.toString(),
+      client_id: apiReview.clientName || 'Client',
+      description: apiReview.comment,
+      stars: (apiReview.rating || 0) * 2
+    };
+  }
+
+  private formatEventFromApi(apiEvent: EventResponse): any {
+    return {
+      id: apiEvent.id,
+      shop_id: apiEvent.shopId,
+      title: apiEvent.title,
+      description: apiEvent.description,
+      eventDate: apiEvent.eventDate,
+      isPublic: apiEvent.isPublic,
+      status: apiEvent.status,
+      start_date: apiEvent.eventDate,
+      end_date: apiEvent.eventDate
+    };
+  }
+
+  private getShopTypeId(shopType: string | number | undefined): number {
+    if (!shopType) return 1;
+    if (typeof shopType === 'number') return shopType;
+    
+    const typeMap: {[key: string]: number} = {
+      'Luxury Fashion': 1,
+      'Jewelry': 2,
+      'Gastronomy': 3,
+      'Beauty': 4
+    };
+    
+    return typeMap[shopType] || 1;
+  }
+
+  private determineSubscriptionStatus(shop: SearchShopsResponse): 'premium' | 'standard' {
+    return 'standard';
   }
 
   // ==================== CHARGEMENT DES DONNÉES ====================
@@ -265,7 +327,7 @@ private updateUrlWithShop(shop: ShopProfile | null) {
     Promise.all([
       this.loadShopTypes(),
       this.loadAllShops(),
-      this.loadMockReviews() // Charger les mock reviews par défaut
+      this.loadReviews() // Changé de loadMockReviews à loadReviews
     ]).catch(error => {
       console.error('Error loading initial data:', error);
       this.errorMessage.set('Failed to load boutiques. Please try again.');
@@ -287,7 +349,7 @@ private updateUrlWithShop(shop: ShopProfile | null) {
           resolve();
         },
         error: (error) => {
-          console.error('Error loading shop types:', error);
+          console.error('Error loading shop types, using mock data:', error);
           this.shopTypes.set(MOCK_SHOP_TYPES);
           resolve();
         }
@@ -297,25 +359,15 @@ private updateUrlWithShop(shop: ShopProfile | null) {
 
   private loadAllShops(): Promise<void> {
     return new Promise((resolve) => {
-      // Utiliser searchShops avec une chaîne vide pour tout récupérer
       this.apiService.searchShops('').subscribe({
         next: (shops: SearchShopsResponse[]) => {
           if (shops && shops.length > 0) {
             console.log('Shops loaded from API:', shops);
-            // Transformer les données API en ShopProfile avec typage correct
-            const mappedShops: ShopProfile[] = shops.map((shop: SearchShopsResponse) => ({
-              user_id: shop.id,
-              id_type: 1, // À mapper correctement selon votre API
-              id_box: shop.box || 'BOX-00',
-              shop_name: shop.shopName,
-              logo: shop.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${shop.shopName}`,
-              cover_pic: '', // L'API ne fournit pas coverPic dans search
-              description: shop.description || 'Luxury boutique at MasterOne Mall',
-              subscription_status: 'standard' as const
-            }));
+            
+            const mappedShops: ShopProfile[] = shops.map(shop => this.formatShopFromApi(shop));
             this.allShops.set(mappedShops);
             
-            // Charger les détails pour chaque shop (coverPic, etc.)
+            // Charger les détails pour chaque shop
             mappedShops.forEach(shop => {
               this.loadShopDetails(shop.user_id);
             });
@@ -334,9 +386,17 @@ private updateUrlWithShop(shop: ShopProfile | null) {
     });
   }
 
-  private loadMockReviews(): Promise<void> {
+  private loadReviews(): Promise<void> {
     return new Promise((resolve) => {
+      // On commence par charger les mock reviews
       this.allReviews.set(MOCK_REVIEWS);
+      
+      // Ensuite on essaie de charger les vraies reviews si l'utilisateur est connecté
+      if (this.authService.isLoggedIn() && this.allShops().length > 0) {
+        this.allShops().forEach(shop => {
+          this.loadShopReviews(shop.user_id);
+        });
+      }
       resolve();
     });
   }
@@ -351,33 +411,36 @@ private updateUrlWithShop(shop: ShopProfile | null) {
                   ...s, 
                   cover_pic: shop.coverPic || s.cover_pic,
                   description: shop.description || s.description,
-                  id_type: Number(shop.shopType) || s.id_type
+                  id_type: this.getShopTypeId(shop.shopType) || s.id_type
                 }
               : s
           )
         );
-        
-        // Charger les événements et reviews du shop
-        this.loadShopEvents(shopId);
-        this.loadShopReviews(shopId);
       },
       error: (error) => {
         console.error(`Error loading details for shop ${shopId}:`, error);
+        // On garde les données existantes
       }
     });
+    
+    // On charge toujours les événements et reviews, même si getShopProfile échoue
+    this.loadShopEvents(shopId);
+    this.loadShopReviews(shopId);
+    this.loadShopDiscounts(shopId);
   }
 
   private loadShopEvents(shopId: number) {
     this.apiService.getShopEvents(shopId).subscribe({
       next: (events: EventResponse[]) => {
         if (events && events.length > 0) {
+          const formattedEvents = events.map(e => this.formatEventFromApi(e));
           this.shopsEvents.update(map => {
             const newMap = new Map(map);
-            newMap.set(shopId, events);
+            newMap.set(shopId, formattedEvents);
             return newMap;
           });
         } else {
-          // Fallback sur les mock events
+          // Pas d'événements de l'API, on essaie les mock events
           const mockEvents = MOCK_EVENTS.filter(e => e.shop_id === shopId);
           if (mockEvents.length > 0) {
             this.shopsEvents.update(map => {
@@ -389,8 +452,7 @@ private updateUrlWithShop(shop: ShopProfile | null) {
         }
       },
       error: (error) => {
-        console.error(`Error loading events for shop ${shopId}:`, error);
-        // Fallback sur les mock events
+        console.error(`Error loading events for shop ${shopId}, using mock data:`, error);
         const mockEvents = MOCK_EVENTS.filter(e => e.shop_id === shopId);
         if (mockEvents.length > 0) {
           this.shopsEvents.update(map => {
@@ -403,75 +465,118 @@ private updateUrlWithShop(shop: ShopProfile | null) {
     });
   }
 
+  private loadShopDiscounts(shopId: number) {
+    // Utiliser les mock discounts pour l'instant
+    const mockDiscounts = MOCK_DISCOUNTS.filter(d => d.shop_id === shopId);
+    if (mockDiscounts.length > 0) {
+      this.shopsDiscounts.update(map => {
+        const newMap = new Map(map);
+        newMap.set(shopId, mockDiscounts);
+        return newMap;
+      });
+    }
+  }
+
   private loadShopReviews(shopId: number) {
     this.apiService.getShopReviews(shopId).subscribe({
       next: (reviews: ReviewResponse[]) => {
         if (reviews && reviews.length > 0) {
-          const mappedReviews: ShopReview[] = reviews.map(r => ({
-            id: r.id,
-            create_at: r.date,
-            shop_id: shopId.toString(),
-            client_id: r.clientName,
-            description: r.comment,
-            stars: r.rating * 2 // Convertir /5 en /10
-          }));
+          const mappedReviews: ShopReview[] = reviews.map(r => 
+            this.formatReviewFromApi(r, shopId)
+          );
           
-          this.allReviews.update(current => [...current, ...mappedReviews]);
+          this.allReviews.update(current => {
+            // Remplacer les reviews mock par les vraies reviews
+            const nonMockReviews = current.filter(r => r.id > 1000); // Garder les reviews avec ID > 1000 (supposées être de l'API)
+            return [...nonMockReviews, ...mappedReviews];
+          });
         }
       },
       error: (error) => {
-        console.error(`Error loading reviews for shop ${shopId}:`, error);
-        // Les mock reviews sont déjà chargées via loadMockReviews
+        console.error(`Error loading reviews for shop ${shopId}, keeping mock data:`, error);
+        // On garde les mock reviews
       }
     });
   }
 
   private loadShopById(shopId: number) {
     this.isLoading.set(true);
+    
+    // Chercher d'abord dans les shops déjà chargés
+    const existingShop = this.allShops().find(s => s.user_id === shopId);
+    
+    if (existingShop) {
+      this.selectedShop.set(existingShop);
+      this.data.clientActiveShop.set(existingShop);
+      this.updateUrlWithShop(existingShop);
+      this.isLoading.set(false);
+      return;
+    }
+    
+    // Chercher dans les mock data
+    const mockShop = MOCK_SHOPS.find(s => s.user_id === shopId);
+    if (mockShop) {
+      console.log('Found shop in mock data:', mockShop);
+      this.selectedShop.set(mockShop);
+      this.data.clientActiveShop.set(mockShop);
+      this.updateUrlWithShop(mockShop);
+      
+      // Ajouter aux allShops
+      this.allShops.update(shops => {
+        if (!shops.find(s => s.user_id === shopId)) {
+          return [...shops, mockShop];
+        }
+        return shops;
+      });
+      
+      // Charger les mock events
+      const mockEvents = MOCK_EVENTS.filter(e => e.shop_id === shopId);
+      if (mockEvents.length > 0) {
+        this.shopsEvents.update(map => {
+          const newMap = new Map(map);
+          newMap.set(shopId, mockEvents);
+          return newMap;
+        });
+      }
+      
+      this.isLoading.set(false);
+      return;
+    }
+    
+    // Sinon, charger depuis l'API
     this.apiService.getShopProfile(shopId).subscribe({
       next: (shop: ShopProfileResponse) => {
         const shopProfile: ShopProfile = {
           user_id: shop.id,
-          id_type: Number(shop.shopType) || 1,
+          id_type: this.getShopTypeId(shop.shopType) || 1,
           id_box: shop.box || 'BOX-00',
           shop_name: shop.shopName,
           logo: shop.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${shop.shopName}`,
           cover_pic: shop.coverPic || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200',
           description: shop.description || 'Luxury boutique at MasterOne Mall',
-          subscription_status: 'standard' as const
+          subscription_status: 'standard'
         };
+        
         this.selectedShop.set(shopProfile);
         this.data.clientActiveShop.set(shopProfile);
         this.updateUrlWithShop(shopProfile);
         
-        // Charger les données associées
+        this.allShops.update(shops => {
+          if (!shops.find(s => s.user_id === shopId)) {
+            return [...shops, shopProfile];
+          }
+          return shops;
+        });
+        
         this.loadShopEvents(shopId);
         this.loadShopReviews(shopId);
+        this.loadShopDiscounts(shopId);
         
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error loading shop by ID, checking mock data:', error);
-        // Chercher dans les mock data
-        const mockShop = MOCK_SHOPS.find(s => s.user_id === shopId);
-        if (mockShop) {
-          console.log('Found shop in mock data:', mockShop);
-          this.selectedShop.set(mockShop);
-          this.data.clientActiveShop.set(mockShop);
-          this.updateUrlWithShop(mockShop);
-          
-          // Charger les mock events pour ce shop
-          const mockEvents = MOCK_EVENTS.filter(e => e.shop_id === shopId);
-          if (mockEvents.length > 0) {
-            this.shopsEvents.update(map => {
-              const newMap = new Map(map);
-              newMap.set(shopId, mockEvents);
-              return newMap;
-            });
-          }
-        } else {
-          this.errorMessage.set('Boutique not found');
-        }
+        console.error('Error loading shop by ID:', error);
+        this.errorMessage.set('Boutique not found');
         this.isLoading.set(false);
       }
     });
@@ -488,15 +593,11 @@ private updateUrlWithShop(shop: ShopProfile | null) {
           const favoriteIds = new Set(favorites.map((f: any) => f.shopId));
           this.favorites.set(favoriteIds);
           console.log('Favorites loaded:', favoriteIds);
-        } else {
-          // Si pas de favoris, on garde le set vide mais on log
-          console.log('No favorites found');
-          this.favorites.set(new Set());
         }
       },
       error: (error) => {
         console.error('Error loading favorites:', error);
-        this.favorites.set(new Set());
+        // On garde le set vide
       }
     });
   }
@@ -507,7 +608,6 @@ private updateUrlWithShop(shop: ShopProfile | null) {
     this.apiService.getWallet().subscribe({
       next: (wallet) => {
         console.log('Wallet loaded:', wallet);
-        // Mettre à jour le wallet dans MasterDataService
       },
       error: (error) => {
         console.error('Error loading wallet:', error);
@@ -516,12 +616,18 @@ private updateUrlWithShop(shop: ShopProfile | null) {
   }
 
   toggleFavorite(userId: number | undefined) {
-    if (!userId || !this.authService.isLoggedIn()) return;
+    if (!userId) return;
+    
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/auth/login'], { 
+        queryParams: { returnUrl: this.router.url } 
+      });
+      return;
+    }
     
     const isFavorite = this.favorites().has(userId);
     
     if (isFavorite) {
-      // TODO: Ajouter endpoint pour supprimer des favoris si disponible
       this.favorites.update(prev => {
         const next = new Set(prev);
         next.delete(userId);
@@ -580,6 +686,13 @@ private updateUrlWithShop(shop: ShopProfile | null) {
     this.updateUrlWithShop(null);
   }
 
+  private updateUrlWithShop(shop: ShopProfile | null) {
+    if (shop) {
+      this.router.navigate(['/client/shop', shop.user_id]);
+    } else {
+      this.router.navigate(['/client/shops']);
+    }
+  }
 
   // ==================== GESTION DES REVIEWS ====================
 
@@ -589,12 +702,12 @@ private updateUrlWithShop(shop: ShopProfile | null) {
     const shop = this.selectedShop();
     if (!shop) return;
     
-    // Ajouter la review localement immédiatement pour l'UX
+    // Ajouter la review localement immédiatement
     this.allReviews.update(reviews => [newReview, ...reviews]);
     
     // Appel API pour poster la review
     this.apiService.postReview(shop.user_id, {
-      rating: Math.ceil(newReview.stars / 2), // Convertir /10 en /5
+      rating: Math.ceil(newReview.stars / 2),
       comment: newReview.description
     }).subscribe({
       next: (response) => {
@@ -609,7 +722,6 @@ private updateUrlWithShop(shop: ShopProfile | null) {
       },
       error: (error) => {
         console.error('Error posting review:', error);
-        // La review est déjà ajoutée localement, on garde
       }
     });
   }
@@ -617,18 +729,27 @@ private updateUrlWithShop(shop: ShopProfile | null) {
   // ==================== UTILITAIRES ====================
 
   useMockData() {
-    console.log('Using mock data');
+    console.log('🔧 USING MOCK DATA FOR ALL SHOPS');
     this.allShops.set(MOCK_SHOPS);
     this.shopTypes.set(MOCK_SHOP_TYPES);
     this.allReviews.set(MOCK_REVIEWS);
     
-    // Ajouter les mock events
+    // Ajouter les mock events pour chaque shop
     MOCK_SHOPS.forEach(shop => {
       const mockEvents = MOCK_EVENTS.filter(e => e.shop_id === shop.user_id);
       if (mockEvents.length > 0) {
         this.shopsEvents.update(map => {
           const newMap = new Map(map);
           newMap.set(shop.user_id, mockEvents);
+          return newMap;
+        });
+      }
+      
+      const mockDiscounts = MOCK_DISCOUNTS.filter(d => d.shop_id === shop.user_id);
+      if (mockDiscounts.length > 0) {
+        this.shopsDiscounts.update(map => {
+          const newMap = new Map(map);
+          newMap.set(shop.user_id, mockDiscounts);
           return newMap;
         });
       }
