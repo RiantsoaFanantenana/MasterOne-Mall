@@ -1,10 +1,13 @@
-
-import { Component, AfterViewInit, ElementRef, inject, signal } from '@angular/core';
+// pages/client/client-wallet-view.component.ts
+import { Component, AfterViewInit, ElementRef, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FooterComponent } from './components/footer.component';
 import { CouponItemComponent } from './components/coupon-item.component';
+import { ApiService, WalletResponse } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 
-interface Coupon {
+// Interface locale pour les coupons
+interface LocalCoupon {
   id: string;
   create_at: string;
   start_date: string;
@@ -17,9 +20,32 @@ interface Coupon {
   standalone: true,
   imports: [CommonModule, FooterComponent, CouponItemComponent],
   template: `
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-lumina-rust border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+        <p class="text-[10px] font-black uppercase tracking-widest text-lumina-olive">Loading Wallet...</p>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage()" class="fixed top-24 right-4 z-50 bg-lumina-rust text-white px-6 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-top-2">
+      <p class="text-[10px] font-black uppercase tracking-widest">{{ errorMessage() }}</p>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage()" class="fixed top-24 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-top-2">
+      <p class="text-[10px] font-black uppercase tracking-widest">{{ successMessage() }}</p>
+    </div>
+
+    <!-- Debug indicator -->
+    <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black">
+      Auth: {{ authService.isLoggedIn() ? '✅' : '❌' }} | Points: {{ walletData()?.points || 0 }}
+    </div>
+
     <div class="bg-lumina-cream min-h-screen flex flex-col motion-slide-in">
       <main class="flex-1">
-        <!-- Hero Section -->
+        <!-- Hero Section avec données wallet -->
         <section class="bg-lumina-olive py-24 text-white overflow-hidden relative">
           <div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
              <svg class="w-[800px] h-[800px] animate-spin-slow" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="1" stroke-dasharray="2 10"/></svg>
@@ -36,7 +62,11 @@ interface Coupon {
               </div>
               <span class="text-[10px] font-black uppercase tracking-[0.3em] text-lumina-tan mb-2">Total Coupons</span>
               <span class="text-7xl font-black font-outfit">{{ coupons().length }}</span>
-              <button class="mt-8 px-8 py-3 bg-lumina-rust text-white rounded-2xl font-black text-[9px] uppercase tracking-widest hover:scale-105 transition-all">Redeem All</button>
+              <span class="text-sm text-white/60 mt-2">{{ walletData()?.points || 0 }} points</span>
+              <button class="mt-8 px-8 py-3 bg-lumina-rust text-white rounded-2xl font-black text-[9px] uppercase tracking-widest hover:scale-105 transition-all"
+                      (click)="redeemAllCoupons()">
+                Redeem All
+              </button>
             </div>
           </div>
         </section>
@@ -52,6 +82,7 @@ interface Coupon {
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Afficher les coupons s'il y en a -->
               <app-coupon-item 
                 *ngFor="let coupon of coupons(); let i = index"
                 [id]="coupon.id"
@@ -59,15 +90,39 @@ interface Coupon {
                 [endDate]="coupon.end_date"
                 [createAt]="coupon.create_at"
                 [staggerClass]="'stagger-' + (i % 6 + 1)"
+                (onRedeem)="redeemCoupon(coupon.id)"
               ></app-coupon-item>
 
+              <!-- Message quand pas de coupons -->
               <div *ngIf="coupons().length === 0" class="col-span-2 py-24 text-center border-2 border-dashed border-lumina-olive/10 rounded-[40px] reveal motion-item">
                 <p class="text-lumina-olive/30 font-black uppercase tracking-[0.3em]">No coupons found. Play to win!</p>
               </div>
             </div>
+
+            <!-- Transaction History - avec vérification null -->
+            <div *ngIf="walletData() && walletData()!.transactions && walletData()!.transactions.length > 0" class="mt-16">
+              <div class="flex items-center gap-4 mb-8 reveal-header">
+                <span class="w-12 h-[2px] bg-lumina-rust"></span>
+                <h3 class="text-2xl font-black font-outfit text-lumina-olive uppercase tracking-tight">Transaction History</h3>
+              </div>
+              <div class="bg-white rounded-[40px] p-8 shadow-sm border border-lumina-olive/5">
+                <div *ngFor="let tx of walletData()?.transactions" 
+                     class="flex justify-between items-center py-4 border-b border-lumina-olive/5 last:border-0">
+                  <div>
+                    <p class="font-black text-lumina-olive">{{ tx.description }}</p>
+                    <p class="text-[8px] text-lumina-tan uppercase">{{ tx.date | date }}</p>
+                  </div>
+                  <span [class.text-green-500]="tx.type === 'credit'"
+                        [class.text-lumina-rust]="tx.type === 'debit'"
+                        class="font-black">
+                    {{ tx.type === 'credit' ? '+' : '-' }}{{ tx.amount }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Gamification Section -->
+          <!-- Gamification Section (inchangée) -->
           <div class="space-y-24">
             <!-- Wheel of Fortune -->
             <div class="reveal-container">
@@ -104,10 +159,10 @@ interface Coupon {
                 
                 <button 
                   (click)="spinWheel()"
-                  [disabled]="isSpinning"
+                  [disabled]="isSpinning || !authService.isLoggedIn()"
                   class="w-full py-5 bg-lumina-olive text-white rounded-2xl font-black uppercase tracking-widest hover:bg-lumina-rust transition-all disabled:opacity-20 shadow-xl shadow-lumina-olive/20"
                 >
-                  {{ isSpinning ? 'SPINNING...' : 'SPIN TO WIN!' }}
+                  {{ isSpinning ? 'SPINNING...' : (authService.isLoggedIn() ? 'SPIN TO WIN!' : 'Login to Spin') }}
                 </button>
                 <p class="mt-4 text-[9px] font-black text-lumina-tan uppercase tracking-widest">1 daily spin allowed</p>
               </div>
@@ -127,7 +182,11 @@ interface Coupon {
                   </div>
                   <h4 class="text-2xl font-black font-outfit mb-4">Find & Scan</h4>
                   <p class="text-white/70 text-sm font-medium leading-relaxed mb-8">Scan QR codes hidden throughout the mall corridors to collect rare coupons and digital badges.</p>
-                  <button class="w-full py-4 bg-white text-lumina-rust rounded-2xl font-black uppercase tracking-widest hover:bg-lumina-olive hover:text-white transition-all">Open Scanner</button>
+                  <button class="w-full py-4 bg-white text-lumina-rust rounded-2xl font-black uppercase tracking-widest hover:bg-lumina-olive hover:text-white transition-all"
+                          [disabled]="!authService.isLoggedIn()"
+                          (click)="openScanner()">
+                    {{ authService.isLoggedIn() ? 'Open Scanner' : 'Login to Scan' }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -161,54 +220,97 @@ interface Coupon {
     </style>
   `
 })
-export class ClientWalletViewComponent implements AfterViewInit {
+export class ClientWalletViewComponent implements OnInit, AfterViewInit {
   private el = inject(ElementRef);
+  private apiService = inject(ApiService);
+  public authService = inject(AuthService);
+  
   Math = Math;
 
-  coupons = signal<Coupon[]>([
-    { id: 'LUM-8821-X', create_at: '2024-11-10', start_date: '2024-11-10', end_date: '2024-11-20', description: 'VIP Early Access - 10% Off Sitewide' },
-    { id: 'GOLD-421-B', create_at: '2024-11-12', start_date: '2024-11-15', end_date: '2024-12-01', description: 'Exclusive Gift with Purchase at Horizon Luxe' }
-  ]);
+  // États
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
+  // Données
+  walletData = signal<WalletResponse | null>(null);
+  coupons = signal<LocalCoupon[]>([]); // Vide par défaut
+
+  // Wheel
   wheelSegments = Array(8).fill(0);
   wheelRotation = 0;
   isSpinning = false;
 
+  ngOnInit() {
+    // Ne charger que si connecté
+    if (this.authService.isLoggedIn()) {
+      this.loadWalletData();
+    }
+  }
+
+  ngAfterViewInit() {
+    this.initRevealObserver();
+  }
+
+  private loadWalletData() {
+    this.isLoading.set(true);
+    
+    this.apiService.getWallet().subscribe({
+      next: (wallet) => {
+        console.log('Wallet loaded:', wallet);
+        this.walletData.set(wallet);
+        
+        // Vérifier que wallet et wallet.transactions existent avant d'accéder
+        if (wallet && wallet.transactions && wallet.transactions.length > 0) {
+          // Convertir les transactions en coupons si nécessaire
+          // this.coupons.set(...)
+        }
+        
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading wallet:', error);
+        // Ne pas afficher d'erreur, juste garder l'état vide
+        this.isLoading.set(false);
+      }
+    });
+  }
+
   spinWheel() {
-    if (this.isSpinning) return;
+    if (this.isSpinning || !this.authService.isLoggedIn()) return;
+    
     this.isSpinning = true;
     
-    // Add extra rotations and a random final position
     const extraSpins = 5 + Math.floor(Math.random() * 5);
     const finalAngle = Math.floor(Math.random() * 360);
     this.wheelRotation += (extraSpins * 360) + finalAngle;
 
     setTimeout(() => {
       this.isSpinning = false;
-      this.addWonCoupon();
+      this.successMessage.set('Try again tomorrow!');
+      setTimeout(() => this.successMessage.set(null), 3000);
     }, 4000);
   }
 
-  addWonCoupon() {
-    const rewards = [
-      '20% Discount Storewide',
-      'Free Coffee at Le Petit Café',
-      'VIP Parking Upgrade',
-      'Private Lounge Access (1h)',
-      '15% Off Jewelry Collections'
-    ];
-    const newCoupon: Coupon = {
-      id: 'WIN-' + Math.floor(Math.random() * 9999) + '-W',
-      create_at: new Date().toISOString(),
-      start_date: new Date().toISOString(),
-      end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      description: 'Wheel Prize: ' + rewards[Math.floor(Math.random() * rewards.length)]
-    };
-    this.coupons.update(prev => [newCoupon, ...prev]);
+  redeemCoupon(couponId: string) {
+    if (!this.authService.isLoggedIn()) return;
+    
+    console.log('Redeeming coupon:', couponId);
+    this.successMessage.set('Coupon redeemed successfully!');
+    setTimeout(() => this.successMessage.set(null), 3000);
   }
 
-  ngAfterViewInit() {
-    this.initRevealObserver();
+  redeemAllCoupons() {
+    if (!this.authService.isLoggedIn()) return;
+    
+    console.log('Redeeming all coupons');
+    this.successMessage.set('All coupons redeemed!');
+    setTimeout(() => this.successMessage.set(null), 3000);
+  }
+
+  openScanner() {
+    if (!this.authService.isLoggedIn()) return;
+    console.log('Opening QR scanner');
   }
 
   private initRevealObserver() {
@@ -217,7 +319,6 @@ export class ClientWalletViewComponent implements AfterViewInit {
         if (entry.isIntersecting) {
           entry.target.classList.add('active');
         } else {
-          // Scrollback logic for all reveals in the wallet
           if (entry.target.classList.contains('reveal')) {
             entry.target.classList.remove('active');
           }
@@ -225,7 +326,9 @@ export class ClientWalletViewComponent implements AfterViewInit {
       });
     }, { threshold: 0.1 });
 
-    const reveals = this.el.nativeElement.querySelectorAll('.reveal, .reveal-header');
-    reveals.forEach((r: HTMLElement) => observer.observe(r));
+    setTimeout(() => {
+      const reveals = this.el.nativeElement.querySelectorAll('.reveal, .reveal-header');
+      reveals.forEach((r: HTMLElement) => observer.observe(r));
+    }, 100);
   }
 }

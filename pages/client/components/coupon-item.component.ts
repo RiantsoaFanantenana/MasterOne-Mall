@@ -1,5 +1,5 @@
-
-import { Component, Input } from '@angular/core';
+// pages/client/components/coupon-item.component.ts
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -27,6 +27,12 @@ import { CommonModule } from '@angular/common';
          <div class="bg-lumina-olive/5 px-6 py-2 rounded-xl border border-lumina-olive/10 font-black text-xs text-lumina-olive font-outfit">CODE: {{ id.split('-')[0] }}</div>
          <span class="text-[8px] font-bold text-lumina-tan uppercase">Collected {{ createAt | date:'shortDate' }}</span>
       </div>
+
+      <!-- Redeem button -->
+      <button (click)="onRedeem.emit(id)"
+              class="mt-2 px-6 py-2 bg-lumina-rust text-white rounded-xl text-[8px] font-black uppercase tracking-widest hover:bg-lumina-olive transition-all">
+        Redeem
+      </button>
     </div>
 
     <style>
@@ -42,4 +48,5 @@ export class CouponItemComponent {
   @Input() endDate!: string;
   @Input() createAt!: string;
   @Input() staggerClass: string = '';
+  @Output() onRedeem = new EventEmitter<string>();
 }
