@@ -1,6 +1,6 @@
 export const env = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
+  apiUrl: 'https://m1p13mean-riantsoa-tsaramirana.onrender.com/api',
   tokenKey: 'auth_token',
   geminiApiKey: 'AIzaSyCcr3X9Nornn98lzY888ms18lVmFbJCIsQ'
 };
