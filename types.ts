@@ -122,3 +122,50 @@ export interface ChatConversation {
   unread: boolean;
   messages: { role: 'user' | 'shop', content: string, timestamp: number }[];
 }
+
+// types/client.types.ts
+export interface Wallet {
+  balance: number;
+  points: number;
+  transactions: Transaction[];
+}
+
+export interface Transaction {
+  id: string;
+  amount: number;
+  type: 'credit' | 'debit';
+  description: string;
+  date: string;
+  status: 'pending' | 'completed';
+}
+
+export interface Favorite {
+  shopId: number;
+  shopName: string;
+  logo: string;
+  addedAt: string;
+}
+
+export interface ClientReview {
+  id: number;
+  shopId: number;
+  shopName: string;
+  rating: number;
+  comment: string;
+  date: string;
+  reply?: string;
+}
+
+// types/search.types.ts
+export interface SearchFilters {
+  query: string;
+  shopType?: string;
+  floor?: number;
+  hasEvents?: boolean;
+}
+
+export interface SearchResult {
+  shops: ShopProfile[];
+  total: number;
+  page: number;
+}

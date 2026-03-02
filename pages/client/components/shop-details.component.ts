@@ -1,13 +1,12 @@
-
 import { Component, Input, Output, EventEmitter, AfterViewInit, ElementRef, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MasterDataService } from '../../../services/master-data.service.ts';
-import { ShopProfile } from '../../../types.ts';
-import { ShopReviewsListComponent } from './shop-reviews-list.component.ts';
-import { ShopEventsListComponent } from './shop-events-list.component.ts';
-import { ShopDiscountsListComponent } from './shop-discounts-list.component.ts';
-import { ShopReviewFormComponent } from './shop-review-form.component.ts';
-import { ThreeDPlanComponent } from '../../mall/components/three-d-plan.component.ts';
+import { MasterDataService } from '../../../services/master-data.service';
+import { ShopProfile } from '../../../types';
+import { ShopReviewsListComponent } from './shop-reviews-list.component';
+import { ShopEventsListComponent } from './shop-events-list.component';
+import { ShopDiscountsListComponent } from './shop-discounts-list.component';
+import { ShopReviewFormComponent } from './shop-review-form.component';
+import { ThreeDPlanComponent } from '../../mall/components/three-d-plan.component';
 
 export interface ShopReview {
   id: number;
@@ -49,14 +48,12 @@ export interface ShopReview {
            <div class="h-10 w-[1px] bg-lumina-olive/10 hidden sm:block"></div>
            
            <div class="flex items-center gap-3 md:gap-4">
-             <!-- Contextual Shop Chat Trigger -->
              <button *ngIf="isLoggedIn" 
                      (click)="data.isDirectChatOpen.set(!data.isDirectChatOpen())"
                      [ngClass]="data.isDirectChatOpen() ? 'bg-lumina-mint text-white shadow-lg scale-110' : 'bg-lumina-mint/10 text-lumina-mint hover:bg-lumina-mint hover:text-white'"
                      class="w-12 h-12 rounded-2xl border border-lumina-mint/20 flex items-center justify-center transition-all shadow-sm group relative">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <span class="absolute -top-1 -right-1 w-3 h-3 bg-lumina-rust border-2 border-white rounded-full animate-bounce"></span>
-                <!-- Tooltip -->
                 <div class="absolute top-16 right-0 bg-lumina-dark text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap shadow-2xl">
                   Connect with {{ shop.shop_name }}
                 </div>
@@ -132,7 +129,7 @@ export interface ShopReview {
           <div class="space-y-24">
             <app-shop-reviews-list [reviews]="reviews"></app-shop-reviews-list>
             <div class="pt-12 border-t border-lumina-olive/5">
-              <app-shop-review-form (onSubmit)="handleAddReview($event)"></app-shop-review-form>
+              <app-shop-review-form (reviewSubmitted)="handleAddReview($event)"></app-shop-review-form>
             </div>
           </div>
         </div>
@@ -157,6 +154,7 @@ export class ShopDetailsComponent implements AfterViewInit {
   @Input() isFavorite: boolean = false;
   @Output() back = new EventEmitter<void>();
   @Output() onFavoriteToggle = new EventEmitter<void>();
+  @Output() reviewAdded = new EventEmitter<ShopReview>();
   
   private el = inject(ElementRef);
 
@@ -166,20 +164,40 @@ export class ShopDetailsComponent implements AfterViewInit {
     return idx >= 0 ? idx : 1;
   });
 
-  ngAfterViewInit() { this.initLocalRevealObserver(); }
+  ngAfterViewInit() { 
+    this.initLocalRevealObserver(); 
+  }
 
   handleAddReview(newReview: any) {
-    const reviewWithId = { ...newReview, id: Math.floor(Math.random() * 10000), shop_id: this.shop.id_box };
+    console.log('📍 ShopDetails - New review from form:', newReview);
+    
+    const reviewWithId: ShopReview = { 
+      ...newReview, 
+      id: Math.floor(Math.random() * 10000), 
+      shop_id: this.shop.id_box 
+    };
+    
+    console.log('📍 ShopDetails - Emitting to parent:', reviewWithId);
+    this.reviewAdded.emit(reviewWithId);
+    
+    // ✅ IMPORTANT: Mettre à jour LOCALEMENT pour un affichage immédiat
+    // Créer un nouveau tableau avec la nouvelle review en premier
     this.reviews = [reviewWithId, ...this.reviews];
+    console.log('📍 ShopDetails - Updated local reviews:', this.reviews);
+    
     setTimeout(() => {
       const reviewList = document.querySelector('app-shop-reviews-list');
-      if (reviewList) reviewList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (reviewList) {
+        reviewList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }, 100);
   }
 
   private initLocalRevealObserver() {
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+      entries.forEach(entry => { 
+        if (entry.isIntersecting) entry.target.classList.add('active'); 
+      });
     }, { threshold: 0.05 });
     const reveals = this.el.nativeElement.querySelectorAll('.reveal');
     reveals.forEach((r: HTMLElement) => observer.observe(r));

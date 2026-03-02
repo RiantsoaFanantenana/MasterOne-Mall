@@ -1,7 +1,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShopEventItemComponent } from './shop-event-item.component.ts';
+import { ShopEventItemComponent } from './shop-event-item.component';
 
 @Component({
   selector: 'app-shop-events-list',

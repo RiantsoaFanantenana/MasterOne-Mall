@@ -1,10 +1,8 @@
-
 import { Component, Input, signal, computed, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopItemComponent } from './shop-item.component.ts';
-// Import types from central types.ts to avoid duplication and fix type mismatches
-import { ShopType, ShopProfile } from '../../../types.ts';
+import { ShopItemComponent } from './shop-item.component';
+import { ShopType, ShopProfile } from '../../../types';
 
 @Component({
   selector: 'app-shop-list',
@@ -14,7 +12,7 @@ import { ShopType, ShopProfile } from '../../../types.ts';
     <section class="py-32 px-8 md:px-16 bg-white">
       <div class="max-w-[1400px] mx-auto">
         
-        <!-- Header -->
+        <!-- Header avec recherche -->
         <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div class="reveal active">
             <p class="text-lumina-rust font-black uppercase tracking-[0.4em] text-[10px] mb-4">Directory</p>
@@ -38,8 +36,8 @@ import { ShopType, ShopProfile } from '../../../types.ts';
           </div>
         </div>
 
-        <!-- Favorites Section (DYNAMIQUE) -->
-        <div *ngIf="isLoggedIn && favoriteShops().length > 0" class="mb-32  reveal active animate-in fade-in slide-in-from-top-10 duration-1000">
+        <!-- Favorites Section (visible seulement si connecté) -->
+        <div *ngIf="isLoggedIn && favoriteShops().length > 0" class="mb-32 reveal active animate-in fade-in slide-in-from-top-10 duration-1000">
           <div class="flex items-center gap-6 mb-12">
             <div class="w-14 h-14 bg-lumina-rust rounded-[24px] flex items-center justify-center text-white shadow-3xl shadow-lumina-rust/20 rotate-3">
                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.505 4.04 3 5.5L12 21l7-7Z"/></svg>
@@ -68,17 +66,17 @@ import { ShopType, ShopProfile } from '../../../types.ts';
           <div class="h-[1px] bg-lumina-olive/5 w-full mt-10"></div>
         </div>
 
-        <!-- Category Tabs -->
+        <!-- Category Tabs avec émission du filtre -->
         <div class="flex flex-wrap gap-4 mb-20 reveal active">
           <button 
-            (click)="selectedTypeId.set(null)"
+            (click)="onTypeFilter.emit(null); selectedTypeId.set(null)"
             [class.bg-lumina-olive]="selectedTypeId() === null"
             [class.text-white]="selectedTypeId() === null"
             class="px-10 py-4 rounded-full border border-lumina-olive/10 text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:border-lumina-rust shadow-sm"
           > All Categories </button>
           <button 
             *ngFor="let type of shopTypes"
-            (click)="selectedTypeId.set(type.id)"
+            (click)="onTypeFilter.emit(type.id); selectedTypeId.set(type.id)"
             [class.bg-lumina-olive]="selectedTypeId() === type.id"
             [class.text-white]="selectedTypeId() === type.id"
             class="px-10 py-4 rounded-full border border-lumina-olive/10 text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:border-lumina-rust shadow-sm"
@@ -102,8 +100,13 @@ import { ShopType, ShopProfile } from '../../../types.ts';
           ></app-shop-item>
         </div>
 
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center py-20">
+          <div class="w-12 h-12 border-4 border-lumina-rust border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
         <!-- No Results -->
-        <div *ngIf="filteredShops().length === 0" class="py-40 text-center border-2 border-dashed border-lumina-olive/5 rounded-[60px]">
+        <div *ngIf="!isLoading && filteredShops().length === 0" class="py-40 text-center border-2 border-dashed border-lumina-olive/5 rounded-[60px]">
            <p class="text-lumina-olive/30 font-black uppercase tracking-[0.4em] text-sm">No boutique found in this directory</p>
         </div>
       </div>
@@ -115,14 +118,19 @@ export class ShopListComponent {
   @Input() shops: ShopProfile[] = [];
   @Input() isLoggedIn: boolean = false;
   @Input() favorites: Set<number> = new Set();
+  @Input() isLoading: boolean = false;
+  
   @Output() onSelect = new EventEmitter<ShopProfile>();
   @Output() onFavoriteToggle = new EventEmitter<number>();
+  @Output() onSearch = new EventEmitter<string>();
+  @Output() onTypeFilter = new EventEmitter<number | null>();
 
   searchQuery = '';
   selectedTypeId = signal<number | null>(null);
   
   onSearchChange(val: string) {
     this.searchQuery = val;
+    this.onSearch.emit(val);
   }
 
   isShopFavorite(userId: number) {
@@ -140,7 +148,8 @@ export class ShopListComponent {
     }
     if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
-      list = list.filter(s => s.shop_name.toLowerCase().includes(q));
+      list = list.filter(s => s.shop_name.toLowerCase().includes(q) || 
+                              s.description.toLowerCase().includes(q));
     }
     return list;
   });

@@ -1,8 +1,7 @@
-
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShopReviewItemComponent } from './shop-review-item.component.ts';
-import { ShopReview } from './shop-details.component.ts';
+import { ShopReviewItemComponent } from './shop-review-item.component';
+import { ShopReview } from './shop-details.component';
 
 @Component({
   selector: 'app-shop-reviews-list',
@@ -10,6 +9,14 @@ import { ShopReview } from './shop-details.component.ts';
   imports: [CommonModule, ShopReviewItemComponent],
   template: `
     <div class="space-y-12">
+      <!-- Debug info temporaire -->
+      <div class="bg-blue-100 p-4 rounded-lg mb-4">
+        <p>Debug: {{ reviews.length }} reviews</p>
+        <div *ngFor="let r of reviews; let i = index" class="text-xs">
+          Review {{i+1}}: {{r.client_id}} - {{r.stars}}/10
+        </div>
+      </div>
+
       <div class="flex justify-between items-end border-b border-lumina-olive/5 pb-8">
         <div class="flex flex-col gap-2">
            <h3 class="text-5xl font-black font-outfit text-lumina-olive tracking-tighter">Guest Reviews</h3>
@@ -46,6 +53,10 @@ import { ShopReview } from './shop-details.component.ts';
 })
 export class ShopReviewsListComponent {
   @Input() reviews: ShopReview[] = [];
+
+  ngOnChanges() {
+    console.log('📋 ShopReviewsList received:', this.reviews?.length, 'reviews', this.reviews);
+  }
 
   get averageStars(): string {
     if (this.reviews.length === 0) return '0.0';

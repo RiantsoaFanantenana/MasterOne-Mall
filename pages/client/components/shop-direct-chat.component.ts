@@ -2,7 +2,7 @@
 import { Component, Input, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MasterDataService } from '../../../services/master-data.service.ts';
+import { MasterDataService } from '../../../services/master-data.service';
 
 @Component({
   selector: 'app-shop-direct-chat',

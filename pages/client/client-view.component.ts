@@ -1,14 +1,16 @@
-
-import { Component, AfterViewInit, ElementRef, inject, Output, EventEmitter } from '@angular/core';
+// pages/client/client-view.component.ts
+import { Component, AfterViewInit, ElementRef, inject, Output, EventEmitter, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ApiService } from '../../services/api.service';
+import { MasterDataService } from '../../services/master-data.service';
 
-import { HeroComponent } from './components/hero.component.ts';
-import { UniversComponent } from './components/univers.component.ts';
-import { ShopCarouselComponent } from './components/shop-carousel.component.ts';
-import { ServicesListComponent } from './components/services-list.component.ts';
-import { GalleryComponent } from './components/gallery.component.ts';
-import { EventsComponent } from './components/events.component.ts';
-import { FooterComponent } from './components/footer.component.ts';
+import { HeroComponent } from './components/hero.component';
+import { UniversComponent } from './components/univers.component';
+import { ShopCarouselComponent } from './components/shop-carousel.component';
+import { ServicesListComponent } from './components/services-list.component';
+import { GalleryComponent } from './components/gallery.component';
+import { EventsComponent } from './components/events.component';
+import { FooterComponent } from './components/footer.component';
 
 @Component({
   selector: 'app-client-view',
@@ -27,6 +29,7 @@ import { FooterComponent } from './components/footer.component.ts';
     <div class="bg-white overflow-x-hidden">
       <app-hero 
         id="home-section"
+        [isLoggedIn]="isLoggedIn"
         (onDiscoverMap)="onTabRequest.emit('client-services')"
         (onViewBoutiques)="onTabRequest.emit('client-shops')"
       ></app-hero>
@@ -36,7 +39,12 @@ import { FooterComponent } from './components/footer.component.ts';
         [items]="pillars"
       ></app-univers>
       
-      <app-shop-carousel [items]="shopsCarousel"></app-shop-carousel>
+      <app-shop-carousel 
+        [items]="shopsCarousel"
+        [isLoggedIn]="isLoggedIn"
+        [title]="'Prestige Houses'"
+        [subtitle]="'Excellence gathered under one roof'"
+      ></app-shop-carousel>
 
       <app-services-list 
         id="services-section"
@@ -56,7 +64,11 @@ import { FooterComponent } from './components/footer.component.ts';
 })
 export class ClientViewComponent implements AfterViewInit {
   @Output() onTabRequest = new EventEmitter<string>();
+  @Input() isLoggedIn: boolean = false;
+  
   private el = inject(ElementRef);
+  private apiService = inject(ApiService);
+  private dataService = inject(MasterDataService);
 
   ngAfterViewInit() {
     this.initRevealObserver();
@@ -68,7 +80,6 @@ export class ClientViewComponent implements AfterViewInit {
         if (entry.isIntersecting) {
           entry.target.classList.add('active');
         } else {
-          // Permet de relancer l'animation lors du scroll back
           entry.target.classList.remove('active');
         }
       });

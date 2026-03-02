@@ -1,11 +1,12 @@
-
-import { Component, AfterViewInit, ElementRef, inject, signal, Input } from '@angular/core';
+// pages/client/client-services-view.component.ts
+import { Component, AfterViewInit, ElementRef, inject, signal, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FooterComponent } from './components/footer.component.ts';
-import { ScheduleItemComponent } from './components/schedule-item.component.ts';
-import { ThreeDPlanComponent } from '../mall/components/three-d-plan.component.ts';
-import { MasterDataService } from '../../services/master-data.service.ts';
+import { FooterComponent } from './components/footer.component';
+import { ScheduleItemComponent } from './components/schedule-item.component';
+import { ThreeDPlanComponent } from '../mall/components/three-d-plan.component';
+import { MasterDataService } from '../../services/master-data.service';
+import { AuthService } from '../../services/auth.service'; // ← IMPORT
 
 interface OpeningHour { id: number; day: string; start_time: string; end_time: string; }
 interface ExceptionalOpening { id: number; date: string; start_time: string; end_time: string; }
@@ -16,16 +17,30 @@ interface ExceptionalOpening { id: number; date: string; start_time: string; end
   imports: [CommonModule, FormsModule, FooterComponent, ScheduleItemComponent, ThreeDPlanComponent],
   template: `
     <div class="bg-white min-h-screen flex flex-col motion-slide-in">
+      <!-- Debug indicator (optionnel) -->
+      <div class="fixed top-20 left-4 z-50 bg-black/80 text-white px-4 py-2 rounded-xl text-[10px] font-black">
+        Auth: {{ authService.isLoggedIn() ? '✅ YES' : '❌ NO' }}
+      </div>
+
       <main class="flex-1">
-        <!-- HEADER -->
+        <!-- HEADER avec personnalisation selon login -->
         <section class="relative py-24 bg-lumina-olive text-white overflow-hidden">
           <div class="absolute inset-0 opacity-20">
             <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover" />
           </div>
           <div class="relative z-10 px-8 md:px-16 max-w-[1400px] mx-auto text-center reveal-header">
-            <h2 class="text-lumina-tan font-black uppercase tracking-[0.5em] text-[10px] mb-6">Concierge & Valet Protocol</h2>
-            <h1 class="text-5xl md:text-7xl font-black font-outfit tracking-tighter mb-8">MasterOne Service</h1>
-            <p class="text-lg text-white/70 max-w-2xl mx-auto font-medium italic">Exceptional support for a seamless Parisian journey.</p>
+            <h2 class="text-lumina-tan font-black uppercase tracking-[0.5em] text-[10px] mb-6">
+              {{ authService.isLoggedIn() ? 'Welcome Back' : 'Concierge & Valet Protocol' }}
+            </h2>
+            <h1 class="text-5xl md:text-7xl font-black font-outfit tracking-tighter mb-8">
+              {{ authService.isLoggedIn() ? 'Your Personal Services' : 'MasterOne Service' }}
+            </h1>
+            <p class="text-lg text-white/70 max-w-2xl mx-auto font-medium italic">
+              {{ authService.isLoggedIn() 
+                ? 'Access your personalized services and track your vehicle location.' 
+                : 'Exceptional support for a seamless Parisian journey.' 
+              }}
+            </p>
           </div>
         </section>
 
@@ -42,7 +57,8 @@ interface ExceptionalOpening { id: number; date: string; start_time: string; end
                 <p class="text-lumina-olive/60 mt-6 text-sm leading-relaxed">Navigate the atrium or locate your vehicle in our high-security parking. Register your spot ID below to enable tracking on the discovery engine.</p>
               </div>
 
-              <div *ngIf="isLoggedIn" class="w-full lg:w-96 bg-white p-8 rounded-[40px] shadow-2xl border border-lumina-olive/5 reveal reveal-right">
+              <!-- Parking spot form - visible seulement si connecté -->
+              <div *ngIf="authService.isLoggedIn()" class="w-full lg:w-96 bg-white p-8 rounded-[40px] shadow-2xl border border-lumina-olive/5 reveal reveal-right">
                 <div class="flex items-center gap-4 mb-6">
                   <div class="w-10 h-10 bg-lumina-rust rounded-2xl flex items-center justify-center text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h10c.6 0 1.1-.2 1.5-.5.4.3.9.5 1.5.5Z"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
@@ -58,13 +74,29 @@ interface ExceptionalOpening { id: number; date: string; start_time: string; end
                       placeholder="PA01"
                       class="flex-1 px-6 py-4 bg-lumina-cream border border-lumina-olive/10 rounded-2xl font-bold text-lumina-olive outline-none focus:border-lumina-rust transition-all uppercase"
                     />
-                    <button (click)="saveSpot()" class="px-6 py-4 bg-lumina-olive text-white rounded-2xl font-black text-[10px] uppercase hover:bg-lumina-rust transition-all">Track</button>
+                    <button (click)="saveSpot()" 
+                            [disabled]="!spotInput.trim()"
+                            class="px-6 py-4 bg-lumina-olive text-white rounded-2xl font-black text-[10px] uppercase hover:bg-lumina-rust transition-all disabled:opacity-50">
+                      Track
+                    </button>
                   </div>
                 </div>
-                <div *ngIf="dataService.clientParkingSpot()" class="mt-6 flex items-center justify-between text-xs font-bold text-lumina-rust border-t border-lumina-olive/5 pt-4">
-                  <span>Current: {{ dataService.clientParkingSpot() }}</span>
+                <div *ngIf="savedSpot()" class="mt-6 flex items-center justify-between text-xs font-bold text-lumina-rust border-t border-lumina-olive/5 pt-4">
+                  <span>Current: {{ savedSpot() }}</span>
                   <button (click)="clearSpot()" class="opacity-40 hover:opacity-100 transition-opacity">Clear</button>
                 </div>
+              </div>
+
+              <!-- Message pour les non-connectés -->
+              <div *ngIf="!authService.isLoggedIn()" class="w-full lg:w-96 bg-white/50 backdrop-blur-sm p-8 rounded-[40px] border-2 border-dashed border-lumina-olive/20 text-center reveal reveal-right">
+                <div class="w-16 h-16 bg-lumina-rust/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-lumina-rust"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h4 class="text-lg font-black text-lumina-olive mb-2">Member Exclusive</h4>
+                <p class="text-[10px] font-black uppercase tracking-widest text-lumina-tan mb-4">Login to track your vehicle</p>
+                <button (click)="onLoginRequest.emit()" class="px-6 py-3 bg-lumina-rust text-white rounded-xl text-[9px] font-black uppercase tracking-widest">
+                  Member Access
+                </button>
               </div>
             </div>
 
@@ -73,7 +105,7 @@ interface ExceptionalOpening { id: number; date: string; start_time: string; end
                 [floors]="dataService.mallFloors()"
                 [shops]="allShops"
                 [initialFloorIndex]="0"
-                [selectedSpotId]="dataService.clientParkingSpot()"
+                [selectedSpotId]="savedSpot()"
               ></app-three-d-plan>
               
               <!-- LEGEND -->
@@ -154,11 +186,15 @@ interface ExceptionalOpening { id: number; date: string; start_time: string; end
     </div>
   `
 })
-export class ClientServicesViewComponent implements AfterViewInit {
+export class ClientServicesViewComponent implements OnInit, AfterViewInit {
   @Input() isLoggedIn: boolean = false;
   
   private el = inject(ElementRef);
   public dataService = inject(MasterDataService);
+  public authService = inject(AuthService); // ← Injection du service d'auth
+  
+  // Signal pour la place de parking sauvegardée
+  savedSpot = signal<string | null>(null);
   
   submitted = signal(false);
   requestMail = '';
@@ -182,19 +218,71 @@ export class ClientServicesViewComponent implements AfterViewInit {
     { id: 1, date: 'National Holidays', start_time: '10:00', end_time: '19:00' }
   ];
 
+  ngOnInit() {
+    // Charger la place de parking depuis le localStorage au démarrage
+    this.loadSavedSpot();
+  }
+
+  ngAfterViewInit() { 
+    this.initRevealObserver(); 
+  }
+
+  private loadSavedSpot() {
+    const userId = this.authService.getUserId?.() || 'anonymous';
+    const storageKey = `parking_spot_${userId}`;
+    const saved = localStorage.getItem(storageKey);
+    
+    if (saved) {
+      this.savedSpot.set(saved);
+      // Synchroniser avec le MasterDataService
+      this.dataService.clientParkingSpot.set(saved);
+    }
+  }
+
   saveSpot() {
     if (this.spotInput.trim()) {
-      this.dataService.clientParkingSpot.set(this.spotInput.trim().toUpperCase());
+      const spotId = this.spotInput.trim().toUpperCase();
+      
+      // Sauvegarder dans le signal
+      this.savedSpot.set(spotId);
+      
+      // Sauvegarder dans le MasterDataService
+      this.dataService.clientParkingSpot.set(spotId);
+      
+      // Sauvegarder dans le localStorage avec un identifiant utilisateur
+      const userId = this.authService.getUserId?.() || 'anonymous';
+      const storageKey = `parking_spot_${userId}`;
+      localStorage.setItem(storageKey, spotId);
+      
+      // Log pour debug
+      console.log(`✅ Parking spot saved: ${spotId} for user ${userId}`);
+      
+      // Réinitialiser l'input
       this.spotInput = '';
     }
   }
 
   clearSpot() {
+    // Effacer le signal
+    this.savedSpot.set(null);
+    
+    // Effacer du MasterDataService
     this.dataService.clientParkingSpot.set(null);
+    
+    // Effacer du localStorage
+    const userId = this.authService.getUserId?.() || 'anonymous';
+    const storageKey = `parking_spot_${userId}`;
+    localStorage.removeItem(storageKey);
+    
+    // Log pour debug
+    console.log(`✅ Parking spot cleared for user ${userId}`);
   }
 
-  ngAfterViewInit() { this.initRevealObserver(); }
-  
+  onLoginRequest() {
+    // Émettre vers le parent pour ouvrir le modal de login
+    console.log('Login requested from services');
+  }
+
   private initRevealObserver() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
@@ -203,5 +291,9 @@ export class ClientServicesViewComponent implements AfterViewInit {
     reveals.forEach((r: HTMLElement) => observer.observe(r));
   }
   
-  handleRequestSubmit() { if (this.requestMail && this.requestDesc) { this.submitted.set(true); } }
+  handleRequestSubmit() { 
+    if (this.requestMail && this.requestDesc) { 
+      this.submitted.set(true); 
+    }
+  }
 }
