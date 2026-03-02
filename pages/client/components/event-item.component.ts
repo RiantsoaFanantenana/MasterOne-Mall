@@ -1,14 +1,15 @@
-
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router'; // ← IMPORT
 
 @Component({
   selector: 'app-event-item',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-3xl border border-lumina-olive/5 overflow-hidden shadow-sm hover:shadow-xl transition-all group reveal motion-item"
-         [ngClass]="staggerClass">
+    <div class="bg-white rounded-3xl border border-lumina-olive/5 overflow-hidden shadow-sm hover:shadow-xl transition-all group reveal motion-item cursor-pointer"
+         [ngClass]="staggerClass"
+         (click)="navigateToEvent()"> <!-- ← AJOUT DU CLICK -->
       <div class="h-64 overflow-hidden relative">
         <div class="absolute inset-0 bg-lumina-dark/20 group-hover:bg-transparent transition-colors z-10"></div>
         <img [src]="image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[4000ms]" />
@@ -30,7 +31,7 @@ import { CommonModule } from '@angular/common';
         <p class="text-lumina-olive/60 text-xs font-medium leading-relaxed mb-8 line-clamp-3">{{ description }}</p>
         <div class="flex justify-between items-center pt-6 border-t border-lumina-olive/5">
           <span class="text-[9px] font-black uppercase tracking-widest text-lumina-tan">Shop Ref: {{ shopId }}</span>
-          <button class="text-lumina-olive hover:text-lumina-rust transition-colors">
+          <button class="text-lumina-olive hover:text-lumina-rust transition-colors" (click)="navigateToEvent(); $event.stopPropagation()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </button>
         </div>
@@ -39,7 +40,6 @@ import { CommonModule } from '@angular/common';
 
     <style>
       .motion-item {
-        /* Ultra smooth transition specifically for the "motion" experience */
         transition: transform 4.5s cubic-bezier(0.15, 1, 0.3, 1), opacity 3.5s ease !important;
       }
     </style>
@@ -53,7 +53,10 @@ export class EventItemComponent {
   @Input() status!: string;
   @Input() isPublic: boolean = true;
   @Input() shopId!: string;
+  @Input() eventId!: number; // ← NOUVEAU : ID de l'événement
   @Input() staggerClass: string = '';
+
+  private router = inject(Router); // ← INJECTION DU ROUTER
 
   get statusClass() {
     switch(this.status) {
@@ -61,6 +64,12 @@ export class EventItemComponent {
       case 'draft': return 'bg-lumina-tan text-white';
       case 'cancelled': return 'bg-lumina-rust text-white';
       default: return 'bg-lumina-olive/20 text-lumina-olive';
+    }
+  }
+
+  navigateToEvent() {
+    if (this.eventId) {
+      this.router.navigate(['/client/event', this.eventId]);
     }
   }
 }

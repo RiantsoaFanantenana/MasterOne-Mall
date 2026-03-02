@@ -9,6 +9,7 @@ import { FooterComponent } from './components/footer.component';
 import { MasterDataService } from '../../services/master-data.service';
 import { ApiService, SearchShopsResponse, ShopProfileResponse, EventResponse, ReviewResponse } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service'; // ← IMPORT AJOUTÉ
+import { ActivatedRoute } from '@angular/router';
 
 // ==================== MOCK DATA (fallback quand API échoue) ====================
 const MOCK_SHOP_TYPES: ShopType[] = [
@@ -220,16 +221,36 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngOnInit() {
-    this.loadInitialData();
-    
-    // Vérifier si un shop est sélectionné dans l'URL
-    const params = new URLSearchParams(window.location.search);
-    const shopId = params.get('shopId');
+  // Ajouter dans les injections
+private route = inject(ActivatedRoute);
+
+ngOnInit() {
+  this.loadInitialData();
+  
+  // Vérifier si un shop est sélectionné dans l'URL (paramètre de route)
+  this.route.params.subscribe(params => {
+    const shopId = params['id'];
     if (shopId) {
       this.loadShopById(parseInt(shopId));
+    } else {
+      // Sinon, vérifier les query params (pour compatibilité)
+      const queryParams = new URLSearchParams(window.location.search);
+      const queryShopId = queryParams.get('shopId');
+      if (queryShopId) {
+        this.loadShopById(parseInt(queryShopId));
+      }
     }
+  });
+}
+
+// Mettre à jour updateUrlWithShop pour utiliser les paramètres de route
+private updateUrlWithShop(shop: ShopProfile | null) {
+  if (shop) {
+    this.router.navigate(['/client/shop', shop.user_id]);
+  } else {
+    this.router.navigate(['/client/shops']);
   }
+}
 
   ngAfterViewInit() {
     this.initRevealObserver();
@@ -559,21 +580,6 @@ export class ClientShopsViewComponent implements OnInit, AfterViewInit {
     this.updateUrlWithShop(null);
   }
 
-  private updateUrlWithShop(shop: ShopProfile | null) {
-    try {
-      if (!window.location.protocol.startsWith('blob')) {
-        const url = new URL(window.location.href);
-        if (shop) {
-          url.searchParams.set('shopId', shop.user_id.toString());
-        } else {
-          url.searchParams.delete('shopId');
-        }
-        window.history.pushState({}, '', url.toString());
-      }
-    } catch (e) {
-      console.warn('Navigation state update blocked:', e);
-    }
-  }
 
   // ==================== GESTION DES REVIEWS ====================
 
