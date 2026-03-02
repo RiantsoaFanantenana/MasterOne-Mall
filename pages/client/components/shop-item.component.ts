@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
       <!-- Favorite Button -->
       <button *ngIf="isLoggedIn" 
               (click)="toggleFavorite($event)" 
-              class="absolute top-6 right-6 z-30 w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-md flex items-center justify-center shadow-xl border border-white transition-all hover:scale-110 active:scale-90">
+              class="absolute top-6 right-6 z-30 w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-md flex items-center justify-center shadow-xl border border-white hover:scale-110 active:scale-90">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" 
              [attr.fill]="isFavorite ? '#8C4A33' : 'none'" 
              [attr.stroke]="isFavorite ? '#8C4A33' : '#646E57'" 
@@ -42,7 +42,7 @@ import { CommonModule } from '@angular/common';
           {{ description }}
         </p>
         
-        <button class="text-white text-[10px] font-black uppercase tracking-widest border-b border-white/30 pb-1 hover:border-white transition-all">
+        <button class="text-white text-[10px] font-black uppercase tracking-widest border-b border-white/30 pb-1 hover:border-white">
           Visit Store
         </button>
       </div>
