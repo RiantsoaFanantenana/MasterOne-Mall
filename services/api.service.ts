@@ -270,9 +270,24 @@ export class ApiService {
   }
 
   public logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    this.authService.logout();
-  }
+  // Liste complète des clés à supprimer
+  const keysToRemove = [
+    'auth_token',
+    'isLoggedIn', 
+    'userRole',
+    'chat_history_admin',
+    'chat_history_client',
+    'chat_history_shop'
+  ];
+  
+  // Supprimer toutes ces clés
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+  // Déconnexion du service
+  this.authService.logout();
+  
+  console.log('🔐 Logout completed - auth and chat history removed');
+}
 
   public isAuthenticated(): boolean {
     const token = this.getToken();
