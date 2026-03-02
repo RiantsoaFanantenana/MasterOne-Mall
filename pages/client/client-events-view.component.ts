@@ -1,6 +1,7 @@
 // pages/client/client-events-view.component.ts
-import { Component, AfterViewInit, ElementRef, inject, signal, computed, effect } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router'; // ← IMPORT Router
 import { FooterComponent } from './components/footer.component';
 import { EventItemComponent } from './components/event-item.component';
 import { DiscountItemComponent } from './components/discount-item.component';
@@ -8,8 +9,7 @@ import { EventDetailsComponent } from './components/event-details.component';
 import { EventReview } from './components/event-reviews-list.component';
 import { ApiService, EventResponse } from '../../services/api.service';
 import { MasterDataService } from '../../services/master-data.service';
-import { AuthService } from '../../services/auth.service'; // ← IMPORT
-import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 interface MallEvent {
   id: number;
@@ -151,7 +151,7 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
                 [status]="event.status"
                 [isPublic]="event.is_public"
                 [shopId]="event.shop_id"
-                [eventId]="event.id"  // ← AJOUT
+                [eventId]="event.id"
                 [staggerClass]="'stagger-' + (i % 6 + 1)"
               ></app-event-item>
             </div>
@@ -205,11 +205,13 @@ const MOCK_EVENT_REVIEWS: EventReview[] = [
     </style>
   `
 })
-export class ClientEventsViewComponent implements AfterViewInit {
+export class ClientEventsViewComponent implements OnInit, AfterViewInit {
   private el = inject(ElementRef);
   private apiService = inject(ApiService);
   private data = inject(MasterDataService);
-  public authService = inject(AuthService);  // ← Service partagé
+  private route = inject(ActivatedRoute);
+  private router = inject(Router); // ← Injection du Router
+  public authService = inject(AuthService);
   
   // États
   activeSubTab = signal<'events' | 'discounts'>('events');
@@ -233,7 +235,6 @@ export class ClientEventsViewComponent implements AfterViewInit {
   filteredEvents = computed(() => {
     let events = this.allEvents();
     
-    // Si non connecté, ne montrer que les événements publics
     if (!this.authService.isLoggedIn()) {
       events = events.filter(e => e.is_public === true);
     }
@@ -245,7 +246,6 @@ export class ClientEventsViewComponent implements AfterViewInit {
   filteredDiscounts = computed(() => {
     let discounts = this.allDiscounts();
     
-    // Si non connecté, filtrer les discounts "Member Exclusive"
     if (!this.authService.isLoggedIn()) {
       discounts = discounts.filter(d => d.status !== 'Member Exclusive');
     }
@@ -261,14 +261,10 @@ export class ClientEventsViewComponent implements AfterViewInit {
   });
 
   constructor() {
-    // Effet pour recharger quand l'utilisateur se connecte/déconnecte
     effect(() => {
       console.log('Login status changed:', this.authService.isLoggedIn());
-      // Les computed signals se mettront à jour automatiquement
     });
   }
-
-  private route = inject(ActivatedRoute);
 
   ngOnInit() {
     this.loadInitialData();
@@ -277,10 +273,17 @@ export class ClientEventsViewComponent implements AfterViewInit {
     this.route.params.subscribe(params => {
       const eventId = params['id'];
       if (eventId) {
-        const event = this.allEvents().find(e => e.id === parseInt(eventId));
-        if (event) {
-          this.selectedEvent.set(event);
-        }
+        // Attendre que les données soient chargées
+        const checkEvent = () => {
+          const event = this.allEvents().find(e => e.id === parseInt(eventId));
+          if (event) {
+            this.selectedEvent.set(event);
+          } else {
+            // Réessayer après un délai si l'événement n'est pas encore chargé
+            setTimeout(checkEvent, 100);
+          }
+        };
+        checkEvent();
       } else {
         // Sinon, vérifier les query params (pour compatibilité)
         const queryParams = new URLSearchParams(window.location.search);
@@ -293,28 +296,25 @@ export class ClientEventsViewComponent implements AfterViewInit {
     });
   }
 
-  // Ajouter une méthode pour naviguer vers un événement
-  navigateToEvent(event: MallEvent) {
-    this.router.navigate(['/client/event', event.id]);
-  }
-
   ngAfterViewInit() {
     this.initRevealObserver();
   }
 
+  // Méthode pour naviguer vers un événement
+  navigateToEvent(event: MallEvent) {
+    this.router.navigate(['/client/event', event.id]);
+  }
+
   handleLoginRequest() {
-    // Émettre vers le parent (client-shell) pour ouvrir le modal de login
     console.log('Login requested from event details');
   }
 
   handleBookEvent(event: any) {
     console.log('Booking event:', event);
-    // Implémenter la logique de réservation
   }
 
   handleRegisterForEvent(event: any) {
     console.log('Registering for event:', event);
-    // Implémenter la logique d'inscription
   }
 
   // ==================== CHARGEMENT DES DONNÉES ====================
@@ -342,14 +342,13 @@ export class ClientEventsViewComponent implements AfterViewInit {
           if (events && events.length > 0) {
             console.log('Events loaded from API:', events);
             
-            // Transformer les données API en MallEvent
             const mappedEvents: MallEvent[] = events.map(e => ({
               id: e.id,
               shop_id: e.shopId.toString(),
               title: e.title,
               description: e.description,
               start_date: e.eventDate,
-              end_date: e.eventDate, // L'API n'a qu'une date, on duplique
+              end_date: e.eventDate,
               is_public: e.isPublic,
               created_at: new Date().toISOString(),
               status: e.status
@@ -373,8 +372,6 @@ export class ClientEventsViewComponent implements AfterViewInit {
 
   private loadDiscounts(): Promise<void> {
     return new Promise((resolve) => {
-      // Note: Si votre API a un endpoint pour les discounts, utilisez-le
-      // Sinon, on utilise les mock data
       setTimeout(() => {
         this.allDiscounts.set(MOCK_DISCOUNTS);
         resolve();
@@ -409,14 +406,7 @@ export class ClientEventsViewComponent implements AfterViewInit {
     const event = this.selectedEvent();
     if (!event) return;
     
-    // Ajouter la review localement
     this.allReviews.update(reviews => [newReview, ...reviews]);
-    
-    // TODO: Appel API pour poster la review si disponible
-    // this.apiService.postEventReview(event.id, {
-    //   rating: newReview.stars / 2,
-    //   comment: newReview.description
-    // }).subscribe(...)
     
     setTimeout(() => {
       const reviewList = document.querySelector('app-event-reviews-list');
